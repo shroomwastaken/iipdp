@@ -11,7 +11,9 @@ fn main() {
     if iipdp::recognize_demo(&contents) {
         println!("demo recognized!");
     } else {
-        println!("invalid demo file!")
+        println!("invalid demo file");
+        io::stdin().read_line(&mut String::new()).unwrap();
+        return;
     }
 
     println!("{:?}", iipdp::get_client_name(&contents));
