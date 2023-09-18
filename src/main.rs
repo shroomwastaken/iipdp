@@ -1,5 +1,6 @@
 use std::fs;
 use std::env;
+use std::io;
 use iipdp;
 
 fn main() {
@@ -14,4 +15,6 @@ fn main() {
     }
 
     println!("{:?}", iipdp::get_client_name(&contents));
+
+    io::stdin().read_line(&mut String::new()).unwrap();
 }
