@@ -25,7 +25,7 @@ pub fn get_client_name(contents: &Vec<u8>) -> String {
         if contents[i] != 0 {
             decodestr.push_str(&format!("{:x}", &contents[i]));
         } else {
-            println!("zeroed out");
+            continue;
         }
     }
 
