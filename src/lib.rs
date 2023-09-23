@@ -1,7 +1,6 @@
 use std::any::Any;
 use std::collections::HashMap;
 use std::i32;
-use unicode_segmentation::UnicodeSegmentation;
 use hex;
 
 // all information about the .dem file structure was taken from https://nekz.me/dem/demo.html
@@ -58,9 +57,9 @@ fn get_byte_range_into_string(contents: &Vec<u8>, start: usize, length: usize, v
     let mut decode_str: String = "".to_string();
     
     for i in start..start + length {
-        if format!("{:x}", contents[i]).graphemes(true).count() == 1 {
+        if format!("{:x}", contents[i]).char_indices().count() == 1 {
             decode_str.push_str(&("0".to_owned() + &format!("{:x}", &contents[i])));
-        } else if format!("{:x}", contents[i]).graphemes(true).count() == 2 {
+        } else if format!("{:x}", contents[i]).char_indices().count() == 2 {
             decode_str.push_str(&format!("{:x}", &contents[i]));
         }
     }
