@@ -1,4 +1,4 @@
 /target
-*.dem
+/demos
 *.txt
 UntitledParser-linux
