@@ -23,3 +23,8 @@ Or just drag a demo file onto it to open it.
     3420 - yes
 - Everything else:
     Probably not
+
+# Changelog
+- v0.1:
+    * Added basic message reading, the demo dumping feature and demo timing.
+    * First release
