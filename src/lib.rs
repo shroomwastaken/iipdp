@@ -40,7 +40,7 @@ fn decoder(decode_str: &String, value_type: &str) -> String {
             res_float = 0.00;
         }
 
-        return res_float.to_string();
+        return format!("{:.3}", res_float);
     } else if value_type == "byte" {
         return i8::from_le_bytes([hex::decode(&decode_str).unwrap()[0]]).to_string();
     } else if value_type == "end int" {
