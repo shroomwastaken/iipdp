@@ -1,6 +1,8 @@
+mod bitreader;
 use std::any::Any;
 use std::collections::HashMap;
 use std::i32;
+use bitreader::BitReader;
 use hex;
 
 // all information about the .dem file structure was taken from https://nekz.me/dem/demo.html
@@ -12,43 +14,55 @@ use hex;
 // takes a string of hex bytes (decodestr), value type (value_type);
 // returns readable string (e.g. "484c3244454d4f" into "HL2DEMO");
 fn decoder(decode_str: &String, value_type: &str) -> String {
-    if value_type == "string" {
-        return String::from_utf8_lossy(&hex::decode(&decode_str).unwrap()).to_string();
-    } else if value_type == "int4" {
-        // this is for negative ints, dunno why this works ill be honest 
-        if decode_str.contains("ffffff") {
-            let byte_slice: &Vec<u8> = &decode_str
-                .as_bytes()
-                .chunks(2)
-                .map(|chunk| u8::from_str_radix(std::str::from_utf8(chunk).unwrap(), 16).unwrap())
-                .collect::<Vec<u8>>();
-            let mut le_byte_slice = [0; 4];
-            le_byte_slice.copy_from_slice(&byte_slice);
-            return i32::from_le_bytes([le_byte_slice[0], le_byte_slice[1], le_byte_slice[2], le_byte_slice[3]]).to_string();
-        } else {
+    if decode_str != "Null" {
+        if value_type == "string" {
+            return String::from_utf8_lossy(&hex::decode(&decode_str).unwrap()).to_string();
+        } else if value_type == "int4" {
+            // this is for negative ints, dunno why this works ill be honest 
+            if decode_str.contains("ffffff") {
+                let byte_slice: &Vec<u8> = &decode_str
+                    .as_bytes()
+                    .chunks(2)
+                    .map(|chunk| u8::from_str_radix(std::str::from_utf8(chunk).unwrap(), 16).unwrap())
+                    .collect::<Vec<u8>>();
+                let mut le_byte_slice = [0; 4];
+                le_byte_slice.copy_from_slice(&byte_slice);
+                return i32::from_le_bytes([le_byte_slice[0], le_byte_slice[1], le_byte_slice[2], le_byte_slice[3]]).to_string();
+            } else {
+                let byte_slice: Vec<u8> = hex::decode(&decode_str).unwrap();
+                return i32::from_le_bytes([byte_slice[0], byte_slice[1], byte_slice[2], byte_slice[3]]).to_string();
+            } 
+        } else if value_type == "float" {
             let byte_slice: Vec<u8> = hex::decode(&decode_str).unwrap();
-            return i32::from_le_bytes([byte_slice[0], byte_slice[1], byte_slice[2], byte_slice[3]]).to_string();
-        } 
-    } else if value_type == "float" {
-        let byte_slice: Vec<u8> = hex::decode(&decode_str).unwrap();
-        let mut res_float: f32 = f32::from_bits(u32::from_le_bytes([byte_slice[0], byte_slice[1], byte_slice[2], byte_slice[3]]));
+            let mut res_float: f32 = f32::from_bits(u32::from_le_bytes([byte_slice[0], byte_slice[1], byte_slice[2], byte_slice[3]]));
 
-        // also adjusting for floating point stuff? it works so im not gonna touch it
-        if res_float > 0.0 && res_float < 0.001 {
-            res_float = 0.00;
-        } else if res_float > 10000.0 || res_float < -10000.0 {
-            res_float = 0.00;
+            // also adjusting for floating point stuff? it works so im not gonna touch it
+            if res_float > 0.0 && res_float < 0.001 {
+                res_float = 0.00;
+            } else if res_float > 10000.0 || res_float < -10000.0 {
+                res_float = 0.00;
+            }
+
+            return format!("{:.3}", res_float);
+        } else if value_type == "byte" {
+            return i8::from_le_bytes([hex::decode(&decode_str).unwrap()[0]]).to_string();
+        } else if value_type == "end int" {
+            // the last integer value in the file is 3 bytes instead of 4 for some reason ¯\_(ツ)_/¯
+            let byte_slice: Vec<u8> = hex::decode(&decode_str).unwrap();
+            return i32::from_le_bytes([byte_slice[0], byte_slice[1], byte_slice[2], 0]).to_string();
+        } else if value_type == "bits_int" {
+            return i32::from_str_radix(&decode_str, 2).unwrap().to_string();
+        } else if value_type == "bits_short" {
+            return (u16::from_str_radix(&decode_str, 2).unwrap() as i16).to_string();
+        } else if value_type == "bits_float" {
+            return format!("{:.3}", f32::from_bits(u32::from_str_radix(&decode_str, 2).unwrap()));
+        } else if value_type == "bits_byte" {
+            return i8::from_str_radix(&decode_str, 2).unwrap().to_string();
         }
-
-        return format!("{:.3}", res_float);
-    } else if value_type == "byte" {
-        return i8::from_le_bytes([hex::decode(&decode_str).unwrap()[0]]).to_string();
-    } else if value_type == "end int" {
-        // the last integer value in the file is 3 bytes instead of 4 for some reason ¯\_(ツ)_/¯
-        let byte_slice: Vec<u8> = hex::decode(&decode_str).unwrap();
-        return i32::from_le_bytes([byte_slice[0], byte_slice[1], byte_slice[2], 0]).to_string();
+        return "something went horribly wrong".to_string();
     }
-    return "something went horribly wrong".to_string();
+
+    return "Null".to_string();
 }
 
 // takes file bytes (contents), start index (start), end index (end);
@@ -72,6 +86,16 @@ fn get_byte_range_into_string(contents: &Vec<u8>, start: usize, length: usize, v
     } else {
         return res;
     }
+}
+
+fn get_byte_range_into_binary(contents: &Vec<u8>, start: usize, length: usize) -> String {
+    let mut res: String = "".to_string();
+
+    for i in start..start + length {
+        res.push_str(&format!("{:08b}", &contents[i]));
+    }
+
+    return res;
 }
 
 // takes file bytes (contents);
@@ -186,8 +210,9 @@ fn read_packet_data(contents: &Vec<u8>, start: usize, msg_type: usize) -> HashMa
 
         let size: usize = get_byte_range_into_string(contents, cur_index, 4, "int4").parse().unwrap();
         msg_data.insert("Size", Box::new(size));
+        cur_index += 4;
 
-        // TODO: add UserCmdInfo reader, requires bitstream reader.
+        msg_data.insert("UserCmdInfo", Box::new(read_user_cmd_info(contents, cur_index, size)));
     } else if msg_type == 6 {
         let size: usize = get_byte_range_into_string(contents, cur_index, 4, "int4").parse().unwrap();
         msg_data.insert("Size", Box::new(size));
@@ -226,4 +251,40 @@ fn read_cmd_info(contents: &Vec<u8>, start: usize) -> HashMap<String, Box<dyn An
     }
 
     return cmd_info;
+}
+
+fn read_user_cmd_info(contents: &Vec<u8>, start: usize, length: usize) -> HashMap<String, Box<dyn Any>>{
+    let mut user_cmd_info: HashMap<String, Box<dyn Any>> = HashMap::new();
+    let binary_data: String = get_byte_range_into_binary(contents, start, length);
+
+    let mut reader = BitReader { bit_str: binary_data };
+    reader.init();
+
+    user_cmd_info.insert("CommandNumber".to_string(), Box::new(decoder(&reader.read_x_if_exists(32), "bits_int")));
+    user_cmd_info.insert("TickCount".to_string(), Box::new(decoder(&reader.read_x_if_exists(32), "bits_int")));
+    
+    user_cmd_info.insert("ViewAnglesX".to_string(), Box::new(decoder(&reader.read_x_if_exists(32), "bits_float")));
+    user_cmd_info.insert("ViewAnglesY".to_string(), Box::new(decoder(&reader.read_x_if_exists(32), "bits_float")));
+    user_cmd_info.insert("ViewAnglesZ".to_string(), Box::new(decoder(&reader.read_x_if_exists(32), "bits_float")));
+    
+    user_cmd_info.insert("ForwardMove".to_string(), Box::new(decoder(&reader.read_x_if_exists(32), "bits_float")));
+    user_cmd_info.insert("SideMove".to_string(), Box::new(decoder(&reader.read_x_if_exists(32), "bits_float")));
+    user_cmd_info.insert("UpMove".to_string(), Box::new(decoder(&reader.read_x_if_exists(32), "bits_float")));
+
+    user_cmd_info.insert("Buttons".to_string(), Box::new(decoder(&reader.read_x_if_exists(32), "bits_int")));
+
+    user_cmd_info.insert("Impulse".to_string(), Box::new(decoder(&reader.read_x_if_exists(8), "bits_byte")));
+
+    user_cmd_info.insert("WeaponSelect".to_string(), Box::new(decoder(&reader.read_x_if_exists(11), "bits_int")));
+
+    if user_cmd_info["WeaponSelect"].downcast_ref::<String>().unwrap() == &"Null".to_string() {
+        user_cmd_info.insert("WeaponSubtype".to_string(), Box::new("Null".to_string()));
+    } else {
+        user_cmd_info.insert("WeaponSubtype".to_string(), Box::new(decoder(&reader.read_bits(6), "bits_int")));
+    }
+
+    user_cmd_info.insert("MouseDx".to_string(), Box::new(decoder(&reader.read_x_if_exists(16), "bits_short")));
+    user_cmd_info.insert("MouseDy".to_string(), Box::new(decoder(&reader.read_x_if_exists(16), "bits_short")));
+
+    return user_cmd_info;
 }

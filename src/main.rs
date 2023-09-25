@@ -171,7 +171,32 @@ fn main() {
                     let _ = file.write_fmt(format_args!("[{}] USERCMD (5)\n", &key));
                     let _ = file.write_fmt(format_args!("\tCmd: {}\n", &value["Cmd"].downcast_ref::<String>().unwrap()));
                     let _ = file.write_fmt(format_args!("\tData Size (bytes): {}\n", &value["Size"].downcast_ref::<usize>().unwrap()));
-                    let _ = file.write_all("\tNO DATA AVAILABLE YET\n".as_bytes());
+                    
+                    let user_cmd_info = &value["UserCmdInfo"].downcast_ref::<HashMap<String, Box<dyn Any>>>().unwrap();
+
+                    let _ = file.write_all("\tUserCmdInfo:\n".as_bytes());
+                    let _ = file.write_fmt(format_args!("\t\tCommand Number: {}\n", user_cmd_info["CommandNumber"].downcast_ref::<String>().unwrap()));
+                    let _ = file.write_fmt(format_args!("\t\tTick Count: {}\n", user_cmd_info["TickCount"].downcast_ref::<String>().unwrap()));
+
+                    let _ = file.write_all("\t\tView Angles: ".as_bytes());
+                    let _ = file.write_fmt(format_args!("{} ", user_cmd_info["ViewAnglesX"].downcast_ref::<String>().unwrap()));
+                    let _ = file.write_fmt(format_args!("{} ", user_cmd_info["ViewAnglesY"].downcast_ref::<String>().unwrap()));
+                    let _ = file.write_fmt(format_args!("{}\n", user_cmd_info["ViewAnglesZ"].downcast_ref::<String>().unwrap()));
+
+                    let _ = file.write_all("\t\tMovement: ".as_bytes());
+                    let _ = file.write_fmt(format_args!("{} ", user_cmd_info["ForwardMove"].downcast_ref::<String>().unwrap()));
+                    let _ = file.write_fmt(format_args!("{} ", user_cmd_info["SideMove"].downcast_ref::<String>().unwrap()));
+                    let _ = file.write_fmt(format_args!("{}\n", user_cmd_info["UpMove"].downcast_ref::<String>().unwrap()));
+
+                    let _ = file.write_fmt(format_args!("\t\tButtons: {}\n", user_cmd_info["Buttons"].downcast_ref::<String>().unwrap()));
+                    let _ = file.write_fmt(format_args!("\t\tImpulse: {}\n", user_cmd_info["Impulse"].downcast_ref::<String>().unwrap())); 
+
+                    let _ = file.write_fmt(format_args!("\t\tWeapon Select, Subtype: {}, {}\n", user_cmd_info["WeaponSelect"].downcast_ref::<String>().unwrap(), 
+                                                                                                user_cmd_info["WeaponSubtype"].downcast_ref::<String>().unwrap()));
+
+                    let _ = file.write_fmt(format_args!("\t\tMouse Dx, Dy: {}, {}\n", user_cmd_info["MouseDx"].downcast_ref::<String>().unwrap(),
+                                                                                    user_cmd_info["MouseDy"].downcast_ref::<String>().unwrap()));
+
                 } else if cur_msg_type == 6 {
                     let _ = file.write_fmt(format_args!("[{}] DATATABLES (6)\n", &key));
                     let _ = file.write_fmt(format_args!("\tData Size (bytes): {}\n", &value["Size"].downcast_ref::<usize>().unwrap()));
