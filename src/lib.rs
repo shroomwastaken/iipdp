@@ -88,6 +88,8 @@ fn get_byte_range_into_string(contents: &Vec<u8>, start: usize, length: usize, v
     }
 }
 
+// takes file bytes (contents), start index (start), amount of bytes to read (length);
+// returns hex string from bytes transformed into binary;
 fn get_byte_range_into_binary(contents: &Vec<u8>, start: usize, length: usize) -> String {
     let mut res: String = "".to_string();
 
@@ -253,13 +255,16 @@ fn read_cmd_info(contents: &Vec<u8>, start: usize) -> HashMap<String, Box<dyn An
     return cmd_info;
 }
 
+// takes file bytes (contents), start index (start), length of bytes to read (length);
+// returns HashMap with the UserCmdInfo;
 fn read_user_cmd_info(contents: &Vec<u8>, start: usize, length: usize) -> HashMap<String, Box<dyn Any>>{
     let mut user_cmd_info: HashMap<String, Box<dyn Any>> = HashMap::new();
-    let binary_data: String = get_byte_range_into_binary(contents, start, length);
+    let binary_data: String = get_byte_range_into_binary(contents, start, length); // have to do this with binary because thanks valve;
 
-    let mut reader = BitReader { bit_str: binary_data };
-    reader.init();
+    let mut reader = BitReader { bit_str: binary_data }; // new reader object;
+    reader.init(); // transform the bit string inside the reader object (see bitreader.rs);
 
+    // all of the values in UserCmdInfo are Optional, meaning that the value exists only if the bit before its supposed to be set is 1; 
     user_cmd_info.insert("CommandNumber".to_string(), Box::new(decoder(&reader.read_x_if_exists(32), "bits_int")));
     user_cmd_info.insert("TickCount".to_string(), Box::new(decoder(&reader.read_x_if_exists(32), "bits_int")));
     
@@ -277,6 +282,7 @@ fn read_user_cmd_info(contents: &Vec<u8>, start: usize, length: usize) -> HashMa
 
     user_cmd_info.insert("WeaponSelect".to_string(), Box::new(decoder(&reader.read_x_if_exists(11), "bits_int")));
 
+    // Weapon Subtype is only set if Weapon Select is set;
     if user_cmd_info["WeaponSelect"].downcast_ref::<String>().unwrap() == &"Null".to_string() {
         user_cmd_info.insert("WeaponSubtype".to_string(), Box::new("Null".to_string()));
     } else {

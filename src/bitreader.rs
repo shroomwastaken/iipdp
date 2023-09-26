@@ -3,6 +3,10 @@ pub struct BitReader {
 }
 
 impl BitReader {
+
+    // takes byte string;
+    // returns byte string but the bits are from least significant to most significant;
+    // e. g. "00100001" turns into "10000100"
     pub fn from_least_to_most_significant(&self, byte: &String) -> String {
         let mut bits = [false; 8];
 
@@ -23,6 +27,8 @@ impl BitReader {
         return char_vec_bits.into_iter().collect();
     }
 
+    // transforms bit string into bit string with bytes that have bits
+    // from least significant to most significant;
     pub fn init(&mut self) {
         let mut chunks: Vec<String> = self.bit_str
                 .chars()
@@ -38,6 +44,8 @@ impl BitReader {
         self.bit_str = chunks.into_iter().collect();
     }
 
+    // takes amount of bits to read (amount);
+    // returns read bits and removes read bits from bit string;
     pub fn read_bits(&mut self, amount: usize) -> String {
         let mut res: String = "".to_string();
 
@@ -49,6 +57,8 @@ impl BitReader {
         return res;
     }
 
+    // reads x bits if the next bit in the string is 1;
+    // takes amount of bits to read (x), returns read bits;
     pub fn read_x_if_exists(&mut self, x:usize) -> String{
         let mut res: String;
 
