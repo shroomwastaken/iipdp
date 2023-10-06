@@ -516,8 +516,8 @@ pub fn write_msg_data_to_file(file: &mut File, messages: Vec<NetSvcMessage>) {
                 let msg_data: nt::NetTick = message.data.into();
                 file.write_all("\n\tMessage: NetTick".as_bytes());
                 file.write_fmt(format_args!("\n\t\tTick: {}", msg_data.tick));
-                file.write_fmt(format_args!("\n\t\tHost Frame Time: {}", msg_data.host_frame_time));
-                file.write_fmt(format_args!("\n\t\tHost Frame Time Standard Deviation: {}", msg_data.host_frame_time_standard_deviation));
+                file.write_fmt(format_args!("\n\t\tHost Frame Time: {}", msg_data.host_frame_time as f32 / 1e5));
+                file.write_fmt(format_args!("\n\t\tHost Frame Time Standard Deviation: {}", msg_data.host_frame_time_standard_deviation  as f32 / 1e5));
             },
             nsmt::NetNop => { file.write_all("\n\tmessage: NetNop".as_bytes()); },
             nsmt::NetStringCmd => {
