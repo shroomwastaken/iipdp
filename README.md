@@ -24,13 +24,14 @@ Options are the same as Windows
 
 # Compatible Source Engine Versions
 Portal:
-* Steampipe - yes
 * 5135 (Source Unpack) - yes
-* 3420 - yes
 
 Everything else:
-* Probably not
+* No
 # Changelog
 - v0.1:
-    * Added basic message reading, the demo dumping feature and demo timing.
+    * Added basic packet reading, the demo dumping feature and demo timing.
     * First release
+- v0.2:
+    * Added NET/SVC message parsing
+    * Completely restructured the original packet reading code
