@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::Write;
+use std::io;
 
 use crate::structs::netsvc_types::{
     NetNop, NetDisconnect, NetFile, NetSetConVar, NetSignonState, NetSplitScreenUser, NetStringCmd, NetTick, SvcBspDecal, SvcClassInfo, SvcCmdKeyValues,
@@ -441,15 +442,18 @@ impl NetSvcMessage {
     }
 }
 
-pub fn parse(reader: &mut BitReader, demo_data_mgr: &mut DataManager) -> Vec<NetSvcMessage> {
+pub fn parse(reader: &mut BitReader, demo_data_mgr: &mut DataManager, size: i32) -> Vec<NetSvcMessage> {
     let mut messages: Vec<NetSvcMessage> = Vec::new();
+    let start_index = reader.cur_bit_index;
 
-    while reader.bit_str.len() > 6 {
-
+    while ((start_index + size * 8) - reader.cur_bit_index) > 6 {
         let mut cur_message: NetSvcMessage = NetSvcMessage::new();
 
         let msg_type = reader.read_int(6);
+
         cur_message.msg_type = nsmt::from_int(msg_type);
+
+        println!("msg_type: {}", msg_type);
 
         match cur_message.msg_type {
             nsmt::Unknown => cur_message.data = nsmdt::Unknown,

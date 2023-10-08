@@ -50,6 +50,7 @@ pub struct NetTick {
 
 impl NetTick {
     pub fn parse(reader: &mut BitReader) -> Self {
+        println!("here");
         Self {
             tick: reader.read_int(32),
             host_frame_time: reader.read_int(16),
@@ -163,7 +164,7 @@ impl SvcSendTable {
         Self {
             needs_decoder: needs_decoder,
             length: length,
-            props: reader.read_int(length as usize),
+            props: reader.read_int(length),
         }
     }
 }
@@ -185,7 +186,7 @@ impl SvcClassInfo {
 
                 let mut cur_server_class: utils::ServerClass = utils::ServerClass::new();
 
-                cur_server_class.class_id = reader.read_int((length as f32).log2() as usize + 1);
+                cur_server_class.class_id = reader.read_int((length as f32).log2() as i32 + 1);
                 cur_server_class.class_name = reader.read_ascii_string_nulled();
                 cur_server_class.data_table_name = reader.read_ascii_string_nulled();
 
@@ -227,7 +228,7 @@ impl SvcCreateStringTable {
     pub fn parse(reader: &mut BitReader) -> Self {
         let name = reader.read_ascii_string_nulled();
         let max_entries = reader.read_int(16);
-        let num_entries = reader.read_int(((max_entries as f32).log2() as usize) + 1);
+        let num_entries = reader.read_int(((max_entries as f32).log2() as i32) + 1);
         let length = reader.read_int(20);
         let user_data_fixed_size = reader.read_bool();
 
@@ -243,7 +244,7 @@ impl SvcCreateStringTable {
         let flags = reader.read_int(1);
 
         let string_data: utils::StringTable = utils::StringTable::new(); // placeholder
-        reader.skip(length as usize); // skip bits for now
+        reader.skip(length as i32); // skip bits for now
 
         Self {
             name: name,
@@ -273,7 +274,7 @@ impl SvcUpdateStringTable {
 
         let length = reader.read_int(20);
         let data = utils::StringTable::new(); // nothin
-        reader.skip(length as usize);
+        reader.skip(length as i32);
         Self {
             table_id: table_id,
             num_changed_entries: num_changed_entries,
@@ -325,7 +326,7 @@ impl SvcVoiceData {
         let data: utils::VoiceData = utils::VoiceData::new();
 
         // skip bits
-        reader.skip(length as usize);
+        reader.skip(length as i32);
 
         Self {
             client: client,
@@ -370,7 +371,7 @@ impl SvcSounds {
         }
 
         let data: Vec<utils::SoundInfo> = Vec::new(); // placeholder
-        reader.skip(length as usize); // skip
+        reader.skip(length as i32); // skip
 
         Self { reliable_sound: reliable_sounds, num_sounds: num_sounds, length: length, data: data }
     }
@@ -435,7 +436,7 @@ impl SvcSplitScreen {
         let length = reader.read_int(11);
         
         let data: utils::SplitScreenData = utils::SplitScreenData::new(); // placeholder
-        reader.skip(length as usize); // skip
+        reader.skip(length as i32); // skip
 
         Self { s_type: s_type, length: length, data: data }
     }
@@ -453,7 +454,7 @@ impl SvcUserMessage {
         let length = reader.read_int(11);
         
         let data: utils::UserMessageData = utils::UserMessageData::new(); // placeholder
-        reader.skip(length as usize); //skip
+        reader.skip(length as i32); //skip
 
         Self { msg_type: msg_type, length: length, data: data }
     }
@@ -473,7 +474,7 @@ impl SvcEntityMessage {
         let length = reader.read_int(11);
 
         let data: utils::EntityMessageData = utils::EntityMessageData::new(); // placeholder
-        reader.skip(length as usize); // skip
+        reader.skip(length as i32); // skip
 
         Self { entity_index: entity_index, class_id: class_id, length: length, data: data }
     }
@@ -537,7 +538,7 @@ impl SvcPacketEntities {
         let length = reader.read_int(20);
         let update_baseline = reader.read_bool();
         let data:utils::PacketEntitiesData = utils::PacketEntitiesData::new(); // placeholder
-        reader.skip(length as usize); // skip
+        reader.skip(length as i32); // skip
         Self {
             max_entries: max_entries,
             is_delta: is_delta,
@@ -563,7 +564,7 @@ impl SvcTempEntities {
         let num_entires = reader.read_int(8);
         let length = reader.read_int(17);
         let data: utils::TempEntitiesData = utils::TempEntitiesData::new();
-        reader.skip(length as usize);
+        reader.skip(length as i32);
         Self { num_entries: num_entires, length: length, data: data }
     }
 }
@@ -636,7 +637,7 @@ impl SvcCmdKeyValues {
     pub fn parse(reader: &mut BitReader) -> Self {
         let length = reader.read_int(32);
         let data: utils::CmdKeyValuesData = utils::CmdKeyValuesData::new();
-        reader.skip((length*8) as usize);
+        reader.skip((length*8) as i32);
 
         Self { length: length, data: data }
     }
@@ -651,7 +652,7 @@ impl SvcPaintmapData {
     pub fn parse(reader: &mut BitReader) -> Self {
         let length = reader.read_int(32);
         let data: utils::PaintmapData = utils::PaintmapData::new();
-        reader.skip(length as usize);
+        reader.skip(length as i32);
 
         Self { length: length, data: data }
     }

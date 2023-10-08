@@ -35,9 +35,8 @@ pub fn get_packets(reader: &mut BitReader, demo: &mut Demo) -> Vec<Packet> {
 
             break;
         }
-
-        packets.push(cur_packet);
         
+        packets.push(cur_packet);
     }
 
     return packets;
@@ -58,7 +57,7 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
             data.out_sequence = reader.read_int(32);
             data.size = reader.read_int(32); // in bytes!!!
 
-            data.messages = parse(&mut reader.split_and_skip(data.size as usize * 8), demo_data_mgr);
+            data.messages = parse(&mut reader.split_and_skip(data.size as i32 * 8), demo_data_mgr, data.size);
 
             packet_data = PacketDataType::Packet(data);
         },
@@ -66,7 +65,7 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
             let mut data = ConsoleCmd::new();
 
             data.size = reader.read_int(32);
-            data.data = reader.read_ascii_string((data.size * 8) as usize);
+            data.data = reader.read_ascii_string((data.size * 8) as i32);
             
             packet_data = PacketDataType::ConsoleCmd(data);
         },
@@ -74,7 +73,7 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
             let mut data = DataTables::new();
             data.size = reader.read_int(32);
             // no parsing yet so just skip
-            reader.skip((data.size * 8) as usize);
+            reader.skip((data.size * 8) as i32);
 
             packet_data = PacketDataType::DataTables(data);
         },
@@ -87,7 +86,7 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
             data.table_count = reader.read_int(8);
 
             // no parsing yet so just skip
-            reader.skip((data.size * 8) as usize);
+            reader.skip((data.size * 8) as i32);
 
             packet_data = PacketDataType::StringTables(data);
         },
@@ -102,7 +101,7 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
 
             data.cmd = reader.read_int(32);
             data.size = reader.read_int(32);
-            data.data = UserCmdInfo::parse(&mut reader.split_and_skip((data.size * 8) as usize));
+            data.data = UserCmdInfo::parse(&mut reader.split_and_skip((data.size * 8) as i32));
 
             packet_data = PacketDataType::UserCmd(data);
         }

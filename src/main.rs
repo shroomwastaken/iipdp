@@ -37,31 +37,23 @@ fn main() {
         return;
     }
     
-    let file = fs::read(&args[1]).unwrap_or_else(|err| {
+    let mut main_reader: BitReader = BitReader { contents: fs::read(&args[1]).unwrap_or_else(|err| {
         println!(r#"Demo file reading failed because of: {} ¯\_(ツ)_/¯"#, err);
         io::stdin().read_line(&mut String::new()).unwrap();
         exit(1);
-    });
-
-    let mut contents: String = "".to_string();
-
-    for byte in file {
-        contents.push_str(&format!("{:08b}", byte));
-    }
+    }), cur_bit_index: 0 };
 
     println!("Parsing...\n");
     let start_time = Instant::now();
 
-    let mut main_reader: BitReader = BitReader::new(contents);
-
     let mut header: DemoHeader = DemoHeader::new();
     header.parse(&mut main_reader);    
 
-    let wrapped_packets: Vec<Packet> = parser::get_packets(&mut main_reader, &mut demo);
+    let packets: Vec<Packet> = parser::get_packets(&mut main_reader, &mut demo);
     
     demo.header = header;
 
-    demo.packets = wrapped_packets;
+    demo.packets = packets;
 
     if demo.header.demo_file_stamp != "HL2DEMO" {
         println!("Invalid demo file");
