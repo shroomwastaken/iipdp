@@ -7,13 +7,12 @@ impl BitReader {
     pub fn read_bits(&mut self, num_bits: i32) -> Vec<u8> {
         let mut result:  Vec<u8> = Vec::new();
         let mut bits_left = num_bits;
-        for byte in self.cur_bit_index / 8..self.cur_bit_index / 8 + (num_bits / 8 + if num_bits & 8 == 0 && num_bits >= 8 { 0 } else { 1 }) {
+        for _ in self.cur_bit_index / 8..self.cur_bit_index / 8 + (num_bits / 8 + if num_bits & 8 == 0 && num_bits >= 8 { 0 } else { 1 }) {
             let mut cur_val: u8 = 0;
             for bit in 0..if bits_left >= 8 { 8 } else { bits_left } {
-                cur_val |= ((self.contents[byte as usize] >> ((self.cur_bit_index) % 8)) & 1) << bit;
+                cur_val |= ((self.contents[(self.cur_bit_index / 8) as usize] >> ((self.cur_bit_index) % 8)) & 1) << bit;
                 self.cur_bit_index += 1;
             }
-            println!("{}", bits_left);
             result.push(cur_val);
             bits_left -= 8;
         }
@@ -34,7 +33,6 @@ impl BitReader {
 
     pub fn read_int(&mut self, amount: i32) -> i32 {
         let bytes = self.read_bits(amount);
-        println!("{:?}", bytes);
         let res = match bytes.len() {
             1 => i32::from_le_bytes([bytes[0], 0, 0, 0]),
             2 => i32::from_le_bytes([bytes[0], bytes[1], 0, 0]),
@@ -42,7 +40,6 @@ impl BitReader {
             4 => i32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]),
             _ => 0,
         };
-        println!("{}", res);
         return res
     }
 
@@ -68,8 +65,6 @@ impl BitReader {
         char_vec.push(byte);
 
         let res = String::from_utf8(char_vec).unwrap().trim_end_matches("\0").to_string();
-
-        println!("{}", res);
 
         return res;
     }
