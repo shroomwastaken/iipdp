@@ -50,7 +50,6 @@ pub struct NetTick {
 
 impl NetTick {
     pub fn parse(reader: &mut BitReader) -> Self {
-        println!("here");
         Self {
             tick: reader.read_int(32),
             host_frame_time: reader.read_int(16),
@@ -227,10 +226,15 @@ pub struct SvcCreateStringTable {
 impl SvcCreateStringTable {
     pub fn parse(reader: &mut BitReader) -> Self {
         let name = reader.read_ascii_string_nulled();
+        println!("name: {}, current index: {}", name, reader.cur_bit_index);
         let max_entries = reader.read_int(16);
+        println!("max_entries: {}, current index: {}", max_entries, reader.cur_bit_index);
         let num_entries = reader.read_int(((max_entries as f32).log2() as i32) + 1);
+        println!("num_entries {}, current index: {}", num_entries, reader.cur_bit_index);
         let length = reader.read_int(20);
+        println!("length: {}, current index: {}", length, reader.cur_bit_index);
         let user_data_fixed_size = reader.read_bool();
+        println!("user data fixed size: {}, current index: {}", user_data_fixed_size, reader.cur_bit_index);
 
         let mut user_data_size: Option<i32> = None;
         let mut user_data_size_bits: Option<i32> = None;
@@ -242,9 +246,12 @@ impl SvcCreateStringTable {
         
         // this is 2 bits on demo protocol 4 !!! (will do later)
         let flags = reader.read_int(1);
+        println!("flags: {}, current index: {}", flags, reader.cur_bit_index);
 
         let string_data: utils::StringTable = utils::StringTable::new(); // placeholder
+        println!("\nsupposed to skip to: {}", reader.cur_bit_index + length);
         reader.skip(length as i32); // skip bits for now
+        println!("skipped to: {}", reader.cur_bit_index);
 
         Self {
             name: name,

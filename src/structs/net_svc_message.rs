@@ -449,11 +449,14 @@ pub fn parse(reader: &mut BitReader, demo_data_mgr: &mut DataManager, size: i32)
     while ((start_index + size * 8) - reader.cur_bit_index) > 6 {
         let mut cur_message: NetSvcMessage = NetSvcMessage::new();
 
+        println!("\n\n---------TRYING TO PARSE NEW MESSAGE!!!------------");
+        println!("reading msg_type at index: {}", reader.cur_bit_index);
+
         let msg_type = reader.read_int(6);
 
         cur_message.msg_type = nsmt::from_int(msg_type);
 
-        println!("msg_type: {}", msg_type);
+        println!("msg_type: {}, current index: {}\n", msg_type, reader.cur_bit_index);
 
         match cur_message.msg_type {
             nsmt::Unknown => cur_message.data = nsmdt::Unknown,
