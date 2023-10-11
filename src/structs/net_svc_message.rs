@@ -448,7 +448,7 @@ pub fn parse(reader: &mut BitReader, demo_data_mgr: &mut DataManager, size: i32)
     while ((start_index + size * 8) - reader.cur_bit_index) > 6 {
         let mut cur_message: NetSvcMessage = NetSvcMessage::new();
 
-        let msg_type = reader.read_int(6);
+        let msg_type = reader.read_int(if demo_data_mgr.network_protocol <= 14 { 5 } else { 6 });
 
         cur_message.msg_type = nsmt::from_int(msg_type);
 
@@ -465,7 +465,7 @@ pub fn parse(reader: &mut BitReader, demo_data_mgr: &mut DataManager, size: i32)
             nsmt::SvcBspDecal => cur_message.data = nsmdt::SvcBspDecal(nt::SvcBspDecal), // no parsing
             nsmt::SvcClassInfo => cur_message.data = nsmdt::SvcClassInfo(nt::SvcClassInfo::parse(reader)),
             nsmt::SvcCmdKeyValues => cur_message.data = nsmdt::SvcCmdKeyValues(nt::SvcCmdKeyValues::parse(reader)),
-            nsmt::SvcCreateStringTable => cur_message.data = nsmdt::SvcCreateStringTable(nt::SvcCreateStringTable::parse(reader)),
+            nsmt::SvcCreateStringTable => cur_message.data = nsmdt::SvcCreateStringTable(nt::SvcCreateStringTable::parse(reader, demo_data_mgr)),
             nsmt::SvcCrosshairAngle => cur_message.data = nsmdt::SvcCrosshairAngle(nt::SvcCrosshairAngle::parse(reader)),
             nsmt::SvcEntityMessage => cur_message.data = nsmdt::SvcEntityMessage(nt::SvcEntityMessage::parse(reader)),
             nsmt::SvcFixAngle => cur_message.data = nsmdt::SvcFixAngle(nt::SvcFixAngle::parse(reader)),
@@ -600,7 +600,7 @@ pub fn write_msg_data_to_file(file: &mut File, messages: Vec<NetSvcMessage>) {
                 file.write_fmt(format_args!("\n\t\tUser Data Fixed Size: {}", msg_data.user_data_fixed_size));
                 file.write_fmt(format_args!("\n\t\tUser Data Size: {}", msg_data.user_data_size.map(|i| i.to_string()).unwrap_or_else(|| {"Null".to_string()})));
                 file.write_fmt(format_args!("\n\t\tUser Data Size Bits: {}", msg_data.user_data_size_bits.map(|i| i.to_string()).unwrap_or_else(|| {"Null".to_string()})));
-                file.write_fmt(format_args!("\n\t\tFlags: {}", msg_data.flags));
+                file.write_fmt(format_args!("\n\t\tFlags: {}", msg_data.flags.map(|i| i.to_string()).unwrap_or_else(|| {"Null".to_string()})));
                 file.write_all("\n\t\tNO MORE DATA AVAILABLE (yet)".as_bytes());
             },
             nsmt::SvcUpdateStringTable => {

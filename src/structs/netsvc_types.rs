@@ -1,5 +1,6 @@
 use crate::bitreader::BitReader;
 use crate::structs::utils;
+use crate::structs::data_manager::DataManager;
 
 // contains no data
 pub struct NetNop;
@@ -130,22 +131,25 @@ pub struct SvcServerInfo {
 
 impl SvcServerInfo {
     pub fn parse(reader: &mut BitReader) -> Self {
-        Self {
-            protocol: reader.read_int(16),
-            server_count: reader.read_int(32),
-            is_hltv: reader.read_bool(),
-            is_dedicated: reader.read_bool(),
-            client_crc: reader.read_int(32),
-            max_classes: reader.read_int(16),
-            map_crc: reader.read_int(32),
-            player_slot: reader.read_int(8),
-            max_clients: reader.read_int(8),
-            tick_interval: reader.read_float(32),
-            platform: reader.read_ascii_string(8).chars().next().unwrap(),
-            game_dir: reader.read_ascii_string_nulled(),
-            map_name: reader.read_ascii_string_nulled(),
-            sky_name: reader.read_ascii_string_nulled(),
-            host_name: reader.read_ascii_string_nulled(),
+        let protocol = reader.read_int(16);
+        let server_count = reader.read_int(32);
+        let is_hltv = reader.read_bool();
+        let is_dedicated = reader.read_bool();
+        let client_crc = reader.read_int(32);
+        let max_classes =  reader.read_int(16);
+        let map_crc = reader.read_int(32);
+        let player_slot = reader.read_int(8);
+        let max_clients = reader.read_int(8);
+        let tick_interval = reader.read_float(32);
+        let platform = reader.read_ascii_string(8).chars().next().unwrap();
+        let game_dir = reader.read_ascii_string_nulled();
+        let map_name = reader.read_ascii_string_nulled();
+        let sky_name = reader.read_ascii_string_nulled();
+        let host_name = reader.read_ascii_string_nulled();
+
+        Self { protocol: protocol, server_count: server_count, is_hltv: is_hltv, is_dedicated: is_dedicated, client_crc: client_crc,
+            max_classes: max_classes, tick_interval: tick_interval, map_crc: map_crc, player_slot: player_slot,
+            max_clients: max_clients, platform: platform, game_dir: game_dir, map_name: map_name, sky_name: sky_name, host_name: host_name
         }
     }
 }
@@ -219,12 +223,12 @@ pub struct SvcCreateStringTable {
     pub user_data_fixed_size: bool,
     pub user_data_size: Option<i32>,
     pub user_data_size_bits: Option<i32>,
-    pub flags: i32,
+    pub flags: Option<i32>, // doesnt exist on 3420 so this is an Option
     pub string_data: utils::StringTable, // placeholder for now
 }
 
 impl SvcCreateStringTable {
-    pub fn parse(reader: &mut BitReader) -> Self {
+    pub fn parse(reader: &mut BitReader, data_mgr: &DataManager) -> Self {
         let name = reader.read_ascii_string_nulled();
         let max_entries = reader.read_int(16);
         let num_entries = reader.read_int(((max_entries as f32).log2() as i32) + 1);
@@ -239,8 +243,11 @@ impl SvcCreateStringTable {
             user_data_size_bits = Some(reader.read_int(4));
         }
         
+        let mut flags: Option<i32> = None;
         // this is 2 bits on demo protocol 4 !!! (will do later)
-        let flags = reader.read_int(1);
+        if data_mgr.network_protocol >= 15 {
+            flags = Some(reader.read_int(1));
+        }
 
         let string_data: utils::StringTable = utils::StringTable::new(); // placeholder
         reader.skip(length as i32); // skip bits for now
