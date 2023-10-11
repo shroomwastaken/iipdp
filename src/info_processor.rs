@@ -181,9 +181,9 @@ pub fn dump_file(file_path: &String, demo: Demo) {
             file.write_fmt(format_args!("\tData Size (bytes): {}\n", packet_data.size));
             file.write_all("\tNO DATA AVAILABLE YET\n".as_bytes());
         } else if cur_packet_type == PacketType::Unknown {
-            file.write_fmt(format_args!("[{}] Unknown packet type\n", packet.tick));
+            file.write_fmt(format_args!("[{}] Unknown packet type (most likely a bug)\n", packet.tick));
         }
         file.write_all("\n".as_bytes());
     }
-    println!("Dumping done!");    
+    println!("Dumping done!");
 }
