@@ -35,3 +35,5 @@ Everything else:
 - v0.2:
     * Added NET/SVC message parsing
     * Completely restructured the original packet reading code
+- v0.2.1:
+    * Made it go vrooom (very fast)
