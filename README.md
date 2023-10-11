@@ -24,7 +24,9 @@ Options are the same as Windows
 
 # Compatible Source Engine Versions
 Portal:
+* Steampipe - yes
 * 5135 (Source Unpack) - yes
+* 3420 - yes
 
 Everything else:
 * No
@@ -37,3 +39,6 @@ Everything else:
     * Completely restructured the original packet reading code
 - v0.2.1:
     * Made it go vrooom (very fast)
+- v0.2.2:
+    * Added Steampipe and 3420 support
+    * Made GameEventList implementation better
