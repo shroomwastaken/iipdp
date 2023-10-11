@@ -7,7 +7,7 @@ impl BitReader {
     pub fn read_bits(&mut self, num_bits: i32) -> Vec<u8> {
         let mut result:  Vec<u8> = Vec::new();
         let mut bits_left = num_bits;
-        for _ in self.cur_bit_index / 8..self.cur_bit_index / 8 + (num_bits / 8 + if num_bits & 8 == 0 && num_bits >= 8 { 0 } else { 1 }) {
+        for _ in self.cur_bit_index / 8..self.cur_bit_index / 8 + (num_bits / 8 + if num_bits % 8 == 0 && num_bits >= 8 { 0 } else { 1 }) {
             let mut cur_val: u8 = 0;
             for bit in 0..if bits_left >= 8 { 8 } else { bits_left } {
                 cur_val |= ((self.contents[(self.cur_bit_index / 8) as usize] >> ((self.cur_bit_index) % 8)) & 1) << bit;
@@ -33,14 +33,13 @@ impl BitReader {
 
     pub fn read_int(&mut self, amount: i32) -> i32 {
         let bytes = self.read_bits(amount);
-        let res = match bytes.len() {
+        return match bytes.len() {
             1 => i32::from_le_bytes([bytes[0], 0, 0, 0]),
             2 => i32::from_le_bytes([bytes[0], bytes[1], 0, 0]),
             3 => i32::from_le_bytes([bytes[0], bytes[1], bytes[2], 0]),
             4 => i32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]),
             _ => 0,
-        };
-        return res
+        }
     }
 
     pub fn read_uint_64(&mut self) -> u64 {
@@ -48,7 +47,14 @@ impl BitReader {
     }
 
     pub fn read_float(&mut self, amount: i32) -> f32 {
-        return (f32::from_le_bytes(self.read_bits(amount).as_slice().try_into().unwrap()) * 1000.0).round() / 1000.0;
+        let bytes = self.read_bits(amount);
+        return (match bytes.len() {
+            1 => f32::from_le_bytes([bytes[0], 0, 0, 0]),
+            2 => f32::from_le_bytes([bytes[0], bytes[1], 0, 0]),
+            3 => f32::from_le_bytes([bytes[0], bytes[1], bytes[2], 0]),
+            4 => f32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]),
+            _ => 0.0,
+        } * 1000.0).round() / 1000.0
     }
 
     pub fn read_ascii_string_nulled(&mut self) -> String {
