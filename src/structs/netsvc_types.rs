@@ -517,7 +517,7 @@ impl SvcGameEvent {
 
         let event_id = reader.read_int(9);
 
-        for mut event in &mut game_event_list.data {
+        for event in &mut game_event_list.data {
             if event.descriptor.event_id == event_id {
                 for (name, value_type) in &event.descriptor.keys {
                     match value_type {
