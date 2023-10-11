@@ -24,7 +24,7 @@ pub fn print_header_info(demo: Demo) {
 
     print!("\n");
 
-    let ticks: f32 = demo.packets[demo.packets.len() - 2].tick as f32;
+    let ticks: f32 = demo.data_manager.last_packet_tick as f32;
     let time: f32 = (&ticks + 1f32) * 0.015;
 
     println!("Measured Ticks: {}",  (ticks + 1f32) as i32);
