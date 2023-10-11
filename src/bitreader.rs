@@ -79,6 +79,16 @@ impl BitReader {
         return String::from_utf8(self.read_bits(amount)).unwrap().trim_end_matches("\0").to_string();
     }
 
+    pub fn read_bytes(&mut self, amount: i32) -> Vec<u8> {
+        let mut res: Vec<u8> = Vec::new();
+        for _ in 0..amount {
+            let cur_byte = self.read_bits(8)[0];
+            res.push(cur_byte);
+        }
+
+        return res;
+    }
+
     pub fn read_bool(&mut self) -> bool { return self.read_bits(1)[0] == 1; }
 
     pub fn read_int_if_exists(&mut self, amount: i32) -> Option<i32> { return if self.read_bool() { Some(self.read_int(amount)) } else { None } }
