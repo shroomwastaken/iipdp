@@ -737,7 +737,7 @@ pub fn write_msg_data_to_file(file: &mut File, messages: Vec<NetSvcMessage>) {
                         }, name).to_string());
                         keys_str.push_str(", ");
                     }
-                    keys_str = keys_str[..keys_str.len()-2].to_string();
+                    keys_str = if keys_str != "".to_string() { keys_str[..keys_str.len()-2].to_string() } else { "".to_string() };
                     file.write_fmt(format_args!("{}]", keys_str));
                 }
             },

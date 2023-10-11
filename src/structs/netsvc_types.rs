@@ -603,10 +603,11 @@ impl SvcGameEventList {
     pub fn parse(reader: &mut BitReader) -> Self {
         let events = reader.read_int(9);
         let length = reader.read_int(20);
-        let data: Vec<utils::GameEventDescriptor> = Vec::new();
+        let mut data: Vec<utils::GameEventDescriptor> = Vec::new();
 
         for _ in 0..events {
             let cur_event_desc = utils::GameEventDescriptor::parse(reader);
+            data.push(cur_event_desc);
         }
 
         Self { events: events, length: length, data: data }
