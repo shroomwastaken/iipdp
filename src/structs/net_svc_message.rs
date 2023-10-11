@@ -449,14 +449,9 @@ pub fn parse(reader: &mut BitReader, demo_data_mgr: &mut DataManager, size: i32)
     while ((start_index + size * 8) - reader.cur_bit_index) > 6 {
         let mut cur_message: NetSvcMessage = NetSvcMessage::new();
 
-        println!("\n\n---------TRYING TO PARSE NEW MESSAGE!!!------------");
-        println!("reading msg_type at index: {}", reader.cur_bit_index);
-
         let msg_type = reader.read_int(6);
 
         cur_message.msg_type = nsmt::from_int(msg_type);
-
-        println!("msg_type: {}, current index: {}\n", msg_type, reader.cur_bit_index);
 
         match cur_message.msg_type {
             nsmt::Unknown => cur_message.data = nsmdt::Unknown,
@@ -504,7 +499,6 @@ pub fn parse(reader: &mut BitReader, demo_data_mgr: &mut DataManager, size: i32)
 
 #[allow(unused)]
 pub fn write_msg_data_to_file(file: &mut File, messages: Vec<NetSvcMessage>) {
-    file.write_all("\n".as_bytes());
     for message in messages {
         match message.msg_type {
             nsmt::NetDisconnect => {
@@ -526,7 +520,7 @@ pub fn write_msg_data_to_file(file: &mut File, messages: Vec<NetSvcMessage>) {
                 file.write_fmt(format_args!("\n\t\tHost Frame Time: {}", msg_data.host_frame_time as f32 / 1e5));
                 file.write_fmt(format_args!("\n\t\tHost Frame Time Standard Deviation: {}", msg_data.host_frame_time_standard_deviation  as f32 / 1e5));
             },
-            nsmt::NetNop => { file.write_all("\n\tmessage: NetNop".as_bytes()); },
+            nsmt::NetNop => { file.write_all("\n\tMessage: NetNop".as_bytes()); },
             nsmt::NetStringCmd => {
                 let msg_data: nt::NetStringCmd = message.data.into();
                 file.write_all("\n\tMessage: NetStringCmd".as_bytes());
