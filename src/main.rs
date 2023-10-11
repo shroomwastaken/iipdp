@@ -49,9 +49,12 @@ fn main() {
     let mut header: DemoHeader = DemoHeader::new();
     header.parse(&mut main_reader);    
 
-    let packets: Vec<Packet> = parser::get_packets(&mut main_reader, &mut demo);
-    
     demo.header = header;
+
+    demo.data_manager.demo_protocol = demo.header.demo_protocol;
+    demo.data_manager.network_protocol = demo.header.network_protocol;
+
+    let packets: Vec<Packet> = parser::get_packets(&mut main_reader, &mut demo);
 
     demo.packets = packets;
 
