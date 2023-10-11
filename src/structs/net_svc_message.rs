@@ -12,6 +12,7 @@ use crate::bitreader::BitReader;
 use crate::structs::net_svc_message::NetSvcMessageTypes as nsmt;
 use crate::structs::net_svc_message::NetSvcMessageDataTypes as nsmdt;
 use crate::structs::netsvc_types as nt;
+use crate::structs::utils::GameEventList;
 
 use super::data_manager::DataManager;
 
@@ -470,15 +471,15 @@ pub fn parse(reader: &mut BitReader, demo_data_mgr: &mut DataManager, size: i32)
             nsmt::SvcEntityMessage => cur_message.data = nsmdt::SvcEntityMessage(nt::SvcEntityMessage::parse(reader)),
             nsmt::SvcFixAngle => cur_message.data = nsmdt::SvcFixAngle(nt::SvcFixAngle::parse(reader)),
             nsmt::SvcGameEvent => cur_message.data = nsmdt::SvcGameEvent(nt::SvcGameEvent::parse(reader, &mut demo_data_mgr.game_event_list)),
-            nsmt::SvcGameEventList => cur_message.data = nsmdt::SvcGameEventList(nt::SvcGameEventList::parse(reader)),
+            nsmt::SvcGameEventList => cur_message.data = nsmdt::SvcGameEventList(nt::SvcGameEventList::parse(reader, &mut demo_data_mgr.game_event_list)),
             nsmt::SvcGetCvarValue => cur_message.data = nsmdt::SvcGetCvarValue(nt::SvcGetCvarValue::parse(reader)),
             nsmt::SvcMenu => cur_message.data = nsmdt::SvcMenu(nt::SvcMenu::parse(reader)),
             nsmt::SvcPacketEntities => cur_message.data = nsmdt::SvcPacketEntities(nt::SvcPacketEntities::parse(reader)),
             nsmt::SvcPaintmapData => cur_message.data = nsmdt::SvcPaintmapData(nt::SvcPaintmapData::parse(reader)),
-            nsmt::SvcPrefetch => cur_message.data = nsmdt::SvcPrefetch(nt::SvcPrefetch::parse(reader)),
+            nsmt::SvcPrefetch => cur_message.data = nsmdt::SvcPrefetch(nt::SvcPrefetch::parse(reader, &demo_data_mgr)),
             nsmt::SvcPrint => cur_message.data = nsmdt::SvcPrint(nt::SvcPrint::parse(reader)),
             nsmt::SvcSendTable => cur_message.data = nsmdt::SvcSendTable(nt::SvcSendTable::parse(reader)),
-            nsmt::SvcServerInfo => cur_message.data = nsmdt::SvcServerInfo(nt::SvcServerInfo::parse(reader)),
+            nsmt::SvcServerInfo => cur_message.data = nsmdt::SvcServerInfo(nt::SvcServerInfo::parse(reader, demo_data_mgr)),
             nsmt::SvcSetPause => cur_message.data = nsmdt::SvcSetPause(nt::SvcSetPause::parse(reader)),
             nsmt::SvcSetView => cur_message.data = nsmdt::SvcSetView(nt::SvcSetView::parse(reader)),
             nsmt::SvcSounds => cur_message.data = nsmdt::SvcSounds(nt::SvcSounds::parse(reader)),
@@ -497,7 +498,7 @@ pub fn parse(reader: &mut BitReader, demo_data_mgr: &mut DataManager, size: i32)
 }
 
 #[allow(unused)]
-pub fn write_msg_data_to_file(file: &mut File, messages: Vec<NetSvcMessage>) {
+pub fn write_msg_data_to_file(file: &mut File, messages: Vec<NetSvcMessage>, data_mgr: &DataManager) {
     for message in messages {
         match message.msg_type {
             nsmt::NetDisconnect => {
@@ -549,7 +550,16 @@ pub fn write_msg_data_to_file(file: &mut File, messages: Vec<NetSvcMessage>) {
                 file.write_fmt(format_args!("\n\t\tIs Dedicated: {}", msg_data.is_dedicated));
                 file.write_fmt(format_args!("\n\t\tClient CRC: {}", msg_data.client_crc));
                 file.write_fmt(format_args!("\n\t\tMax Classes: {}", msg_data.max_classes));
-                file.write_fmt(format_args!("\n\t\tMap CRC: {}", msg_data.map_crc));
+                if data_mgr.network_protocol == 24 {
+                    let bytes = msg_data.map_md5.unwrap();
+                    let mut hex_string: String = String::new();
+                    for byte in bytes {
+                        hex_string.push_str(&format_args!("{:02x}", byte).to_string())
+                    }
+                    file.write_fmt(format_args!("\n\t\tMap MD5: 0x{}", hex_string));
+                } else {
+                    file.write_fmt(format_args!("\n\t\tMap CRC: {}", msg_data.map_crc.map(|i| i.to_string()).unwrap_or_else(|| {"Null".to_string()})));
+                }
                 file.write_fmt(format_args!("\n\t\tPlayer Slot: {}", msg_data.player_slot));
                 file.write_fmt(format_args!("\n\t\tMax Clients: {}", msg_data.max_clients));
                 file.write_fmt(format_args!("\n\t\tPlatform: {}", msg_data.platform));
@@ -675,11 +685,10 @@ pub fn write_msg_data_to_file(file: &mut File, messages: Vec<NetSvcMessage>) {
                 file.write_all("\n\tMessage: SvcGameEvent".as_bytes());
                 file.write_fmt(format_args!("\n\t\tLength: {}", msg_data.length));
 
-                for event in msg_data.data {
-                    file.write_fmt(format_args!("\n\t\t{} ({})", event.descriptor.name, event.descriptor.event_id));
-                    for key in event.keys {
-                        file.write_fmt(format_args!("\n\t\t\t{}: {}", key.0, key.1.to_string()));
-                    }
+                let event = msg_data.data;
+                file.write_fmt(format_args!("\n\t\t{} ({})", event.descriptor.name, event.descriptor.event_id));
+                for key in event.keys {
+                    file.write_fmt(format_args!("\n\t\t\t{}: {}", key.0, key.1.to_string()));
                 }
             },
             nsmt::SvcPacketEntities => {
@@ -714,16 +723,16 @@ pub fn write_msg_data_to_file(file: &mut File, messages: Vec<NetSvcMessage>) {
                 file.write_all("\n\t\tNO MORE DATA AVAILABLE (yet)".as_bytes());
             },
             nsmt::SvcGameEventList => {
-                let msg_data: nt::SvcGameEventList = message.data.into();
+                let msg_data: &GameEventList = &data_mgr.game_event_list;
                 file.write_all("\n\tMessage: SvcGameEventList".as_bytes());
                 file.write_fmt(format_args!("\n\t\tLength: {}", msg_data.length));
                 file.write_fmt(format_args!("\n\t\t{} events:", msg_data.events));
                 
-                for event in msg_data.data {
-                    file.write_fmt(format_args!("\n\t\t\t{}: {}", event.event_id, event.name));
+                for event in &msg_data.data {
+                    file.write_fmt(format_args!("\n\t\t\t{}: {}", event.descriptor.event_id, event.descriptor.name));
                     file.write_all("\n\t\t\t\tKeys: [".as_bytes());
                     let mut keys_str: String = "".to_string();
-                    for (name, value_type) in event.keys {
+                    for (name, value_type) in &event.descriptor.keys {
                         keys_str.push_str(&format_args!("{} {}", match value_type {
                             1 => "string",
                             2 => "float",

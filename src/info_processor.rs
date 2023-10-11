@@ -127,7 +127,7 @@ pub fn dump_file(file_path: &String, demo: Demo) {
             file.write_fmt(format_args!("\tInSequence: {}\n", packet_data.in_sequence));
             file.write_fmt(format_args!("\tOutSequence: {}\n", packet_data.out_sequence));
             file.write_fmt(format_args!("\tData Size (bytes): {}", packet_data.size));
-            net_svc_message::write_msg_data_to_file(&mut file, packet_data.messages);
+            net_svc_message::write_msg_data_to_file(&mut file, packet_data.messages, &demo.data_manager);
         } else if cur_packet_type == PacketType::SyncTick {
             let _ = file.write_fmt(format_args!("[{}] SYNCTICK (3)\n", packet.tick));
         } else if cur_packet_type == PacketType::ConsoleCmd {

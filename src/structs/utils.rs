@@ -142,6 +142,12 @@ pub struct GameEvent {
     pub keys: HashMap<String, GameEventKeyTypes> // keys = {"name of value" : value as enum}
 }
 
+impl GameEvent {
+    pub fn new() -> Self {
+        Self { descriptor: GameEventDescriptor::new(), keys: HashMap::new() }
+    }
+}
+
 #[derive(Clone)]
 pub struct GameEventDescriptor {
     pub event_id: i32,
@@ -150,6 +156,10 @@ pub struct GameEventDescriptor {
 }
 
 impl GameEventDescriptor {
+    pub fn new() -> Self {
+        Self { event_id: 0, name: String::new(), keys: HashMap::new() }
+    }
+
     pub fn parse(reader: &mut BitReader) -> Self {
         let event_id = reader.read_int(9);
         let name = reader.read_ascii_string_nulled();

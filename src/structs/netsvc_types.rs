@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use crate::bitreader::BitReader;
 use crate::structs::utils;
 use crate::structs::data_manager::DataManager;
@@ -119,7 +120,8 @@ pub struct SvcServerInfo {
     pub client_crc: i32,
     pub max_classes: i32,
     pub tick_interval: f32,
-    pub map_crc: i32,
+    pub map_crc: Option<i32>, // its either one or the other so theyre both an option
+    pub map_md5: Option<Vec<u8>>,
     pub player_slot: i32,
     pub max_clients: i32,
     pub platform: char,
@@ -127,17 +129,24 @@ pub struct SvcServerInfo {
     pub map_name: String,
     pub sky_name: String,
     pub host_name: String,
+    pub has_replay: Option<bool>, // only exists past network protocol 16
 }
 
 impl SvcServerInfo {
-    pub fn parse(reader: &mut BitReader) -> Self {
+    pub fn parse(reader: &mut BitReader, data_mgr: &DataManager) -> Self {
         let protocol = reader.read_int(16);
         let server_count = reader.read_int(32);
         let is_hltv = reader.read_bool();
         let is_dedicated = reader.read_bool();
         let client_crc = reader.read_int(32);
         let max_classes =  reader.read_int(16);
-        let map_crc = reader.read_int(32);
+        let mut map_crc: Option<i32> = None;
+        let mut map_md5: Option<Vec<u8>> = None;
+        if data_mgr.network_protocol == 24 {
+            map_md5 = Some(reader.read_bytes(16));
+        } else {
+            map_crc = Some(reader.read_int(32));
+        }
         let player_slot = reader.read_int(8);
         let max_clients = reader.read_int(8);
         let tick_interval = reader.read_float(32);
@@ -147,9 +156,14 @@ impl SvcServerInfo {
         let sky_name = reader.read_ascii_string_nulled();
         let host_name = reader.read_ascii_string_nulled();
 
+        let mut has_replay: Option<bool> = None;
+        if data_mgr.network_protocol == 24 {
+            has_replay = Some(reader.read_bool());
+        }
+
         Self { protocol: protocol, server_count: server_count, is_hltv: is_hltv, is_dedicated: is_dedicated, client_crc: client_crc,
-            max_classes: max_classes, tick_interval: tick_interval, map_crc: map_crc, player_slot: player_slot,
-            max_clients: max_clients, platform: platform, game_dir: game_dir, map_name: map_name, sky_name: sky_name, host_name: host_name
+            max_classes: max_classes, tick_interval: tick_interval, map_crc: map_crc, map_md5: map_md5, player_slot: player_slot,
+            max_clients: max_clients, platform: platform, game_dir: game_dir, map_name: map_name, sky_name: sky_name, host_name: host_name, has_replay: has_replay,
         }
     }
 }
@@ -232,7 +246,12 @@ impl SvcCreateStringTable {
         let name = reader.read_ascii_string_nulled();
         let max_entries = reader.read_int(16);
         let num_entries = reader.read_int(((max_entries as f32).log2() as i32) + 1);
-        let length = reader.read_int(20);
+        let length: i32;
+        if data_mgr.network_protocol == 24 {
+            length = reader.read_int(32);
+        } else {
+            length = reader.read_int(20);
+        }
         let user_data_fixed_size = reader.read_bool();
 
         let mut user_data_size: Option<i32> = None;
@@ -488,13 +507,13 @@ impl SvcEntityMessage {
 
 pub struct SvcGameEvent {
     pub length: i32,
-    pub data: Vec<utils::GameEvent>,
+    pub data: utils::GameEvent,
 }
 
 impl SvcGameEvent {
     pub fn parse(reader: &mut BitReader, game_event_list: &mut utils::GameEventList) -> Self {
         let length = reader.read_int(11);
-        let mut data: Vec<utils::GameEvent> = Vec::new();
+        let mut data: utils::GameEvent = utils::GameEvent::new();
 
         let event_id = reader.read_int(9);
 
@@ -512,7 +531,8 @@ impl SvcGameEvent {
                         i32::MIN..=0_i32 | 8_i32..=i32::MAX => event.keys.insert(name.to_string(), utils::GameEventKeyTypes::None),
                     };
                 }
-                data.push(event.clone());
+                data = event.clone();
+                break;
             }
         }
 
@@ -580,8 +600,15 @@ pub struct SvcPrefetch {
 }
 
 impl SvcPrefetch {
-    pub fn parse(reader: &mut BitReader) -> Self {
-        Self { sound_index: reader.read_int(13) }
+    pub fn parse(reader: &mut BitReader, data_mgr: &DataManager) -> Self {
+        let sound_index: i32;
+        if data_mgr.network_protocol == 24 {
+            sound_index = reader.read_int(14);
+        } else {
+            sound_index = reader.read_int(13);
+        }
+
+        Self { sound_index: sound_index }
     }
 }
 
@@ -603,21 +630,23 @@ impl SvcMenu {
 pub struct SvcGameEventList {
     pub events: i32,
     pub length: i32,
-    pub data: Vec<utils::GameEventDescriptor>,
 }
 
 impl SvcGameEventList {
-    pub fn parse(reader: &mut BitReader) -> Self {
+    pub fn parse(reader: &mut BitReader, game_event_list: &mut utils::GameEventList) -> Self {
         let events = reader.read_int(9);
         let length = reader.read_int(20);
-        let mut data: Vec<utils::GameEventDescriptor> = Vec::new();
+
+        game_event_list.events = events;
+        game_event_list.length = length;
 
         for _ in 0..events {
             let cur_event_desc = utils::GameEventDescriptor::parse(reader);
-            data.push(cur_event_desc);
+
+            game_event_list.data.push(utils::GameEvent { descriptor: cur_event_desc, keys: HashMap::new() });
         }
 
-        Self { events: events, length: length, data: data }
+        Self { events: events, length: length }
     }
 }
 
