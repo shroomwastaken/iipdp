@@ -1,6 +1,5 @@
 use std::fs::File;
 use std::io::Write;
-use std::io;
 
 use crate::structs::netsvc_types::{
     NetNop, NetDisconnect, NetFile, NetSetConVar, NetSignonState, NetSplitScreenUser, NetStringCmd, NetTick, SvcBspDecal, SvcClassInfo, SvcCmdKeyValues,
