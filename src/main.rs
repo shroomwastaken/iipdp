@@ -23,16 +23,16 @@ fn main() {
     let mut demo: Demo = Demo::new();
 
     if args.len() == 1 {
-        println!("IIPDP v0.2 made by shroom\nUsage: iipdp <demo file> [-dump]");
+        println!("IIPDP v0.2.1 made by shroom\nUsage: iipdp <demo file> [-dump]");
         println!("-dump will output all of the available demo file information into a text file in the working directory");
         io::stdin().read_line(&mut String::new()).unwrap();
         return;
     } else if args.len() == 2  {
-        println!("IIPDP v0.2 made by shroom\nFile Name: {}\n", &args[1])
+        println!("IIPDP v0.2.1 made by shroom\nFile Name: {}\n", &args[1])
     } else if args.len() == 3 && args[2] == "-dump" {
         dumping = true;
     } else {
-        println!("IIPDP v0.2 made by shroom\nInvalid arguments!");
+        println!("IIPDP v0.2.1 made by shroom\nInvalid arguments!");
         io::stdin().read_line(&mut String::new()).unwrap();
         return;
     }
