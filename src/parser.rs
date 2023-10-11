@@ -27,6 +27,10 @@ pub fn get_packets(reader: &mut BitReader, demo: &mut Demo) -> Vec<Packet> {
         if cur_packet.packet_type != PacketType::Stop {
             cur_packet.tick = reader.read_int(32);
 
+            if cur_packet.tick > 0 {
+                demo.data_manager.last_packet_tick = cur_packet.tick;
+            }
+
             cur_packet.data = read_packet_data(reader, cur_packet.packet_type, &mut demo.data_manager);
         } else {
             cur_packet.tick = reader.read_int(24); // last int is 3 bytes for whatever reason
