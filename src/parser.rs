@@ -33,13 +33,13 @@ pub fn get_packets(reader: &mut BitReader, demo: &mut Demo) -> Vec<Packet> {
 
             cur_packet.data = read_packet_data(reader, cur_packet.packet_type, &mut demo.data_manager);
 
-            break;
+            packets.push(cur_packet);
+
+            return packets;
         }
         
         packets.push(cur_packet);
     }
-
-    return packets;
 }
 
 // takes file bytes (contents), start index (start), message type (msg_type);
