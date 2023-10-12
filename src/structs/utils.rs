@@ -1,7 +1,8 @@
 use std::collections::HashMap;
-
+use core::fmt;
 use crate::bitreader::BitReader;
 
+// for NetSetConVar net/svc message
 pub struct ConVar {
     pub convar_name: String,
     pub convar_value: String,
@@ -13,6 +14,7 @@ impl ConVar {
     }
 }
 
+// for SvcClassInfo
 pub struct ServerClass {
     pub class_id: i32,
     pub class_name: String,
@@ -186,5 +188,40 @@ impl GameEventList {
     pub fn new() -> Self {
         let data: Vec<GameEvent> = Vec::new();
         Self { events: 0, length: 0, data: data }
+    }
+}
+
+// implementation from https://github.com/lopossumi/Rust-Vectors
+pub struct Vec3 {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+}
+
+impl Vec3 {
+    pub fn new(x: f32, y: f32, z: f32) -> Vec3 {
+        Vec3 { x, y, z }
+    }
+
+    pub fn add_vec3(&self, other: Vec3) -> Vec3 {
+        Vec3 { 
+            x: self.x + other.x, 
+            y: self.y + other.y,
+            z: self.z + other.z
+        }
+    }
+
+    pub fn add_vec_int(&self, other: Vec<i32>) -> Vec3 {
+        Vec3 {
+            x: self.x + other[0] as f32,
+            y: self.y + other[1] as f32,
+            z: self.z + other[2] as f32,
+        }
+    }
+}
+
+impl fmt::Display for Vec3 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({}, {}, {})", self.x, self.y, self.z)
     }
 }
