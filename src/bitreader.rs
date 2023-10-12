@@ -1,3 +1,5 @@
+use crate::structs::utils::Vec3;
+
 pub struct BitReader {
     pub contents: Vec<u8>,
     pub cur_bit_index: i32,
@@ -87,6 +89,10 @@ impl BitReader {
         }
 
         return res;
+    }
+
+    pub fn read_vec3(&mut self) -> Vec3 {
+        return Vec3 { x: self.read_float(32), y: self.read_float(32), z: self.read_float(32) };
     }
 
     pub fn read_bool(&mut self) -> bool { return self.read_bits(1)[0] == 1; }
