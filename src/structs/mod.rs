@@ -8,3 +8,4 @@ pub mod net_svc_message;
 pub mod utils;
 pub mod data_manager;
 pub mod netsvc_types;
+pub mod user_message;
