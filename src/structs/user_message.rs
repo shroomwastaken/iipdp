@@ -44,6 +44,7 @@ pub enum UserMessageType {
 
 // all of the currently parseable types
 pub enum UserMessageDataType {
+    Unknown,
     AchievementEvent(AchievementEvent), Battery(Battery),
     CloseCaption(CloseCaption), Damage(Damage), EntityPortalled(EntityPortalled),
     Fade(Fade), Geiger(Geiger), HudMsg(HudMsg), HudText(HudText),
@@ -63,9 +64,17 @@ pub struct UserMessage {
 }
 
 impl UserMessage {
-    pub fn parse(reader: &mut BitReader, msg_type: i32, length: i32) -> Self {
+    pub fn new() -> Self {
+        Self { msg_type: UserMessageType::Unknown, data: UserMessageDataType::Unknown }
+    }
+
+    // i swear this actually might make sense at some point maybe
+    pub fn parse(reader: &mut BitReader, msg_type: UserMessageType, length: i32) -> Self {
         let data = match msg_type {
-            
+            UserMessageType::AchievementEvent => UserMessageDataType::AchievementEvent(AchievementEvent::parse(reader)),
+            UserMessageType::Battery => UserMessageDataType::Battery(Battery::parse(reader)),
+            UserMessageType::CloseCaption => UserMessageDataType::CloseCaption(CloseCaption::parse(reader)),
+            UserMessageType::Damage => UserMessageDataType::Damage(Damage::parse(reader)),
         };
     }
 }

@@ -470,7 +470,6 @@ impl SvcSplitScreen {
 }
 
 pub struct SvcUserMessage {
-    pub msg_type: UserMessageType,
     pub length: i32,
     pub data: UserMessage,
 }
@@ -479,9 +478,11 @@ impl SvcUserMessage {
     pub fn parse(reader: &mut BitReader, user_message_event_list: Vec<UserMessageType>) -> Self {
         let msg_type = reader.read_int(8);
         let length = reader.read_int(11);
-        if msg_type >= user_message_event_list.len() {
+        if msg_type >= user_message_event_list.len() as i32 {
             reader.skip(length);
-            Self { msg_type: UserMessageType::Unknown, length: length, data: UserMessage::}
+            Self { length: length, data: UserMessage::new() }
+        } else {
+            Self { length: length, data: UserMessage::parse(reader, user_message_event_list[msg_type as usize], length)}
         }
     }
 }
