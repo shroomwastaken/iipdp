@@ -1,6 +1,23 @@
 use std::collections::HashMap;
 use core::fmt;
 use crate::bitreader::BitReader;
+use crate::enum_primitive::{FromPrimitive, enum_from_primitive};
+use crate::structs::user_message as umsg;
+
+// used a bunch in usermessages
+pub struct EHandle {
+    pub val: i32,
+}
+
+impl EHandle {
+    pub fn ent_index(&self) -> i32 {
+        return self.val & ((1 << 11) - 1)
+    }
+
+    pub fn serial(&self) -> i32 {
+        return self.val >> 11
+    }
+}
 
 // for NetSetConVar net/svc message
 pub struct ConVar {
@@ -49,14 +66,6 @@ pub struct SoundInfo;
 pub struct SplitScreenData;
 
 impl SplitScreenData {
-    pub fn new() -> Self {
-        Self
-    }
-}
-
-pub struct UserMessageData;
-
-impl UserMessageData {
     pub fn new() -> Self {
         Self
     }

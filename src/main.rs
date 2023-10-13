@@ -10,6 +10,8 @@ use structs::demo_header::DemoHeader;
 use structs::packet::Packet;
 use bitreader::BitReader;
 
+#[macro_use] extern crate enum_primitive;
+
 // declaring modules
 mod structs;
 mod bitreader;
@@ -20,8 +22,6 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     let mut dumping: bool = false;
-
-    let mut demo: Demo = Demo::new();
 
     if args.len() == 1 {
         println!("IIPDP v0.2.2 made by shroom\nUsage: iipdp <demo file> [-dump]");
@@ -50,10 +50,11 @@ fn main() {
     let mut header: DemoHeader = DemoHeader::new();
     header.parse(&mut main_reader);    
 
+    let mut demo = Demo::new();
+
     demo.header = header;
 
-    demo.data_manager.demo_protocol = demo.header.demo_protocol;
-    demo.data_manager.network_protocol = demo.header.network_protocol;
+    demo.data_manager.get_info_from_header(&demo.header);
 
     let packets: Vec<Packet> = parser::get_packets(&mut main_reader, &mut demo);
 

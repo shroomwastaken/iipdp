@@ -3,6 +3,8 @@ use crate::bitreader::BitReader;
 use crate::structs::utils;
 use crate::structs::data_manager::DataManager;
 
+use super::user_message::{UserMessageType, UserMessage};
+
 // contains no data
 pub struct NetNop;
 
@@ -468,20 +470,19 @@ impl SvcSplitScreen {
 }
 
 pub struct SvcUserMessage {
-    pub msg_type: i32,
+    pub msg_type: UserMessageType,
     pub length: i32,
-    pub data: utils::UserMessageData,
+    pub data: UserMessage,
 }
 
 impl SvcUserMessage {
-    pub fn parse(reader: &mut BitReader) -> Self {
+    pub fn parse(reader: &mut BitReader, user_message_event_list: Vec<UserMessageType>) -> Self {
         let msg_type = reader.read_int(8);
         let length = reader.read_int(11);
-        
-        let data: utils::UserMessageData = utils::UserMessageData::new(); // placeholder
-        reader.skip(length as i32); //skip
-
-        Self { msg_type: msg_type, length: length, data: data }
+        if msg_type >= user_message_event_list.len() {
+            reader.skip(length);
+            Self { msg_type: UserMessageType::Unknown, length: length, data: UserMessage::}
+        }
     }
 }
 
