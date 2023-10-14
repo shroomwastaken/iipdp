@@ -2,9 +2,7 @@ use crate::structs::cmd_info::CmdInfo;
 use crate::structs::data_manager::DataManager;
 use crate::structs::demo::Demo;
 use crate::structs::net_svc_message::parse;
-use crate::structs::packet::Packet;
-use crate::structs::packet::PacketDataType;
-use crate::structs::packet::PacketType;
+use crate::structs::packet::{Packet, PacketDataType, PacketType};
 use crate::bitreader::BitReader;
 use crate::structs::packet_data_types::{PP, ConsoleCmd, UserCmd, SyncTick, StringTables, DataTables, Stop};
 use crate::structs::user_cmd_info::UserCmdInfo;
@@ -87,7 +85,6 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
         PacketType::StringTables => {
             let mut data = StringTables::new();
             data.size = reader.read_int(32);
-            data.table_count = reader.read_int(8);
 
             // no parsing yet so just skip
             reader.skip((data.size * 8) as i32);
