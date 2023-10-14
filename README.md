@@ -42,3 +42,5 @@ Everything else:
 - v0.2.2:
     * Added Steampipe and 3420 support
     * Made GameEventList implementation better
+- v0.2.3:
+    * Added UserMessage parsing and dumping
