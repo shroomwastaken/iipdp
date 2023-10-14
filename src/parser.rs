@@ -14,7 +14,7 @@ use crate::structs::user_cmd_info::UserCmdInfo;
 */
 
 // takes file bytes (contents);
-// returns a vector of Message;
+// returns a vector of Packet;
 pub fn get_packets(reader: &mut BitReader, demo: &mut Demo) -> Vec<Packet> {
     let mut packets: Vec<Packet> = Vec::new();
 
@@ -45,7 +45,7 @@ pub fn get_packets(reader: &mut BitReader, demo: &mut Demo) -> Vec<Packet> {
 }
 
 // takes file bytes (contents), start index (start), message type (msg_type);
-// returns HashMap<field name: String, value: Box<dyn Any>>;
+// returns packet data wrapped in PacketDataType enum;
 fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_mgr: &mut DataManager) -> PacketDataType {
     let packet_data: PacketDataType;
 
