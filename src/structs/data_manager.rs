@@ -3,6 +3,7 @@ use crate::structs::demo_header::DemoHeader;
 use crate::structs::user_message::UserMessageType;
 
 #[allow(non_camel_case_types)]
+#[derive(PartialEq)]
 pub enum Game {
     PORTAL_1_3420,
     PORTAL_1_5135,
@@ -36,6 +37,8 @@ impl DataManager {
     }
 
     pub fn get_info_from_header(&mut self, header: &DemoHeader) {
+        self.demo_protocol = header.demo_protocol;
+        self.network_protocol = header.network_protocol;
         match header.network_protocol {
             14 => {
                 self.game = Game::PORTAL_1_3420;
@@ -47,7 +50,7 @@ impl DataManager {
                     UserMessageType::SayText,
                     UserMessageType::SayText2,
                     UserMessageType::TextMsg,
-                    UserMessageType::HUDMsg,
+                    UserMessageType::HudMsg,
                     UserMessageType::ResetHUD,
                     UserMessageType::GameTitle,
                     UserMessageType::ItemPickup,
@@ -82,7 +85,7 @@ impl DataManager {
                     UserMessageType::SayText,
                     UserMessageType::SayText2,
                     UserMessageType::TextMsg,
-                    UserMessageType::HUDMsg,
+                    UserMessageType::HudMsg,
                     UserMessageType::ResetHUD,
                     UserMessageType::GameTitle,
                     UserMessageType::ItemPickup,
@@ -123,7 +126,7 @@ impl DataManager {
                     UserMessageType::SayText,
                     UserMessageType::SayText2,
                     UserMessageType::TextMsg,
-                    UserMessageType::HUDMsg,
+                    UserMessageType::HudMsg,
                     UserMessageType::ResetHUD,
                     UserMessageType::GameTitle,
                     UserMessageType::ItemPickup,
