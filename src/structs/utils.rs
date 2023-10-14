@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 use core::fmt;
 use crate::bitreader::BitReader;
-use crate::enum_primitive::{FromPrimitive, enum_from_primitive};
-use crate::structs::user_message as umsg;
 
 // used a bunch in usermessages
+// ill need to use this at some point so ill just implement it now
+#[derive(PartialEq)]
 pub struct EHandle {
     pub val: i32,
 }
@@ -16,6 +16,12 @@ impl EHandle {
 
     pub fn serial(&self) -> i32 {
         return self.val >> 11
+    }
+}
+
+impl fmt::Display for EHandle {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "<ent_index: {}, serial: {}>", self.ent_index(), self.serial())
     }
 }
 
@@ -201,6 +207,7 @@ impl GameEventList {
 }
 
 // implementation from https://github.com/lopossumi/Rust-Vectors
+#[derive(PartialEq)]
 pub struct Vec3 {
     pub x: f32,
     pub y: f32,
