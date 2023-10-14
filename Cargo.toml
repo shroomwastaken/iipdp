@@ -1,7 +1,8 @@
 [package]
 name = "iipdp"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2021"
 
 [dependencies]
+bitflags = "2.4.0"
 enum_primitive = "0.1.1"
