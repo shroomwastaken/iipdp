@@ -1,19 +1,24 @@
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::Write;
+
 use crate::bitreader::BitReader;
 use crate::structs::utils::{Vec3, EHandle};
 use crate::enum_primitive::enum_from_primitive;
 use crate::enum_primitive::FromPrimitive;
+use crate::bitflags::bitflags;
 
 // used in data_manager.rs
 // this is all the possible usermessage types (except l4d and l4d2) which i borrowed from untitledparser
 // only like 20% of these are actually implemented but ill have them all here cause why not
-#[derive(Debug)]
+#[allow(unused)]
+#[derive(Debug, Copy, Clone)]
 pub enum UserMessageType {
     // book keeping
     Unknown,
     // 3420 types
     Geiger,Train, HudText, SayText, SayText2, TextMsg,
-    HUDMsg, ResetHUD, GameTitle, ItemPickup, ShowMenu,
+    HudMsg, ResetHUD, GameTitle, ItemPickup, ShowMenu,
     Shake, Fade, VguiMenu, Rumble, Battery, Damage,
     VoiceMask, RequestState, CloseCaption, HintText,
     KeyHintText, SquadMemberDied, AmmoDenied, CreditsMsg,
@@ -28,9 +33,9 @@ pub enum UserMessageType {
     CurrentTimescale, DesiredTimescale, InventoryFlash,
     IndicatorFlash, ControlHelperAnimate, TakePhoto,
     Flash, HudPingIndicator, OpenRadialMenu,
-    AddLocator, MPMapCompleted, MPMapIncomplete,
-    MPMapCompletedData, MPTauntEarned, MPTauntUnlocked,
-    MPTauntLocked, MPAllTauntsLocked, PortalFXSurface,
+    AddLocator, MpMapCompleted, MpMapIncomplete,
+    MpMapCompletedData, MpTauntEarned, MpTauntUnlocked,
+    MpTauntLocked, MpAllTauntsLocked, PortalFXSurface,
     PaintWorld, PaintEntity, ChangePaintColor, PaintBombExplode,
     RemoveAllPaint, PaintAllSurfaces, RemovePaint,
     StartSurvey, ApplyHitBoxDamageEffect, SetMixLayerTriggerFactor,
@@ -43,24 +48,25 @@ pub enum UserMessageType {
 }
 
 // all of the currently parseable types
+#[derive(PartialEq)]
 pub enum UserMessageDataType {
     Unknown,
     AchievementEvent(AchievementEvent), Battery(Battery),
     CloseCaption(CloseCaption), Damage(Damage), EntityPortalled(EntityPortalled),
     Fade(Fade), Geiger(Geiger), HudMsg(HudMsg), HudText(HudText),
     KeyHintText(KeyHintText), KillCam(KillCam), LogoTimeMsg(LogoTimeMsg),
-    MPMapCompleted(MpMapCompleted), MpTauntEarned(MpTauntEarned), MPTauntLocked(MpTauntLocked),
-    PaintEntity(PaintEntity), PaintWorld(PaintWorld), PortalFxSurface(PortalFxSurface),
+    MpMapCompleted(MpMapCompleted), MpTauntEarned(MpTauntEarned), MpTauntLocked(MpTauntLocked),
+    PaintEntity(PaintEntity), PaintWorld(PaintWorld),
     ResetHUD(ResetHUD), Rumble(Rumble), SayText(SayText), SayText2(SayText2),
     ScoreboardTempUpdate(ScoreboardTempUpdate), Shake(Shake), TextMsg(TextMsg),
-    Train(Train), TransitionFade(TransitionFade), VguiMenu(VguiMenu), PlayerMask(PlayerMask),
+    Train(Train), TransitionFade(TransitionFade), VguiMenu(VguiMenu),
     VoiceMask(VoiceMask), HapPunch(HapPunch), HapSetConstForce(HapSetConstForce),
     HapSetDrag(HapSetDrag), SpHapWeaponEvent(SpHapWeaponEvent),
 }
 
 pub struct UserMessage {
-    msg_type: UserMessageType,
-    data: UserMessageDataType
+    pub msg_type: UserMessageType,
+    pub data: UserMessageDataType,
 }
 
 impl UserMessage {
@@ -75,11 +81,48 @@ impl UserMessage {
             UserMessageType::Battery => UserMessageDataType::Battery(Battery::parse(reader)),
             UserMessageType::CloseCaption => UserMessageDataType::CloseCaption(CloseCaption::parse(reader)),
             UserMessageType::Damage => UserMessageDataType::Damage(Damage::parse(reader)),
+            UserMessageType::EntityPortalled => UserMessageDataType::EntityPortalled(EntityPortalled::parse(reader)),
+            UserMessageType::Fade => UserMessageDataType::Fade(Fade::parse(reader)),
+            UserMessageType::Geiger => UserMessageDataType::Geiger(Geiger::parse(reader)),
+            UserMessageType::HudMsg => UserMessageDataType::HudMsg(HudMsg::parse(reader)),
+            UserMessageType::HudText => UserMessageDataType::HudText(HudText::parse(reader)),
+            UserMessageType::KeyHintText => UserMessageDataType::KeyHintText(KeyHintText::parse(reader)),
+            UserMessageType::KillCam => UserMessageDataType::KillCam(KillCam::parse(reader)),
+            UserMessageType::LogoTimeMsg => UserMessageDataType::LogoTimeMsg(LogoTimeMsg::parse(reader)),
+            UserMessageType::MpMapCompleted => UserMessageDataType::MpMapCompleted(MpMapCompleted::parse(reader)),
+            UserMessageType::MpTauntEarned => UserMessageDataType::MpTauntEarned(MpTauntEarned::parse(reader)),
+            UserMessageType::MpTauntLocked => UserMessageDataType::MpTauntLocked(MpTauntLocked::parse(reader)),
+            UserMessageType::PaintEntity => UserMessageDataType::PaintEntity(PaintEntity::parse(reader)),
+            UserMessageType::PaintWorld => UserMessageDataType::PaintWorld(PaintWorld::parse(reader)),
+            UserMessageType::ResetHUD => UserMessageDataType::ResetHUD(ResetHUD::parse(reader)),
+            UserMessageType::Rumble => UserMessageDataType::Rumble(Rumble::parse(reader)),
+            UserMessageType::SayText => UserMessageDataType::SayText(SayText::parse(reader)),
+            UserMessageType::SayText2 => UserMessageDataType::SayText2(SayText2::parse(reader)),
+            UserMessageType::ScoreboardTempUpdate => UserMessageDataType::ScoreboardTempUpdate(ScoreboardTempUpdate::parse(reader)),
+            UserMessageType::Shake => UserMessageDataType::Shake(Shake::parse(reader)),
+            UserMessageType::TextMsg => UserMessageDataType::TextMsg(TextMsg::parse(reader)),
+            UserMessageType::Train => UserMessageDataType::Train(Train::parse(reader)),
+            UserMessageType::TransitionFade => UserMessageDataType::TransitionFade(TransitionFade::parse(reader)),
+            UserMessageType::VguiMenu => UserMessageDataType::VguiMenu(VguiMenu::parse(reader)),
+            UserMessageType::VoiceMask => UserMessageDataType::VoiceMask(VoiceMask::parse(reader)),
+            UserMessageType::HapPunch => UserMessageDataType::HapPunch(HapPunch::parse(reader)),
+            UserMessageType::HapSetConstForce => UserMessageDataType::HapSetConstForce(HapSetConstForce::parse(reader)),
+            UserMessageType::HapSetDrag => UserMessageDataType::HapSetDrag(HapSetDrag::parse(reader)),
+            UserMessageType::SPHapWeaponEvent => UserMessageDataType::SpHapWeaponEvent(SpHapWeaponEvent::parse(reader)),
+            _ => UserMessageDataType::Unknown,
         };
+
+        if data == UserMessageDataType::Unknown {
+            reader.skip(length);
+            Self { msg_type: UserMessageType::Unknown, data: data }
+        } else {
+            Self { msg_type: msg_type, data: data }
+        }
     }
 }
 
 // all of the structs and parsing
+#[derive(PartialEq)]
 pub struct AchievementEvent {
     achievement_id: i32,
 }
@@ -90,6 +133,7 @@ impl AchievementEvent {
     }
 }
 
+#[derive(PartialEq)]
 pub struct Battery {
     battery_val: i32,
 }
@@ -100,6 +144,7 @@ impl Battery {
     }
 }
 
+#[derive(PartialEq)]
 pub struct CloseCaption {
     token_name: String,
     duration: f32,
@@ -116,6 +161,7 @@ impl CloseCaption {
     }
 }
 
+#[derive(PartialEq)]
 pub struct Damage {
     armor: i32,
     damage_taken: i32,
@@ -128,14 +174,13 @@ impl Damage {
         Self {
             armor: reader.read_int(8),
             damage_taken: reader.read_int(8),
-            visible_bits_damage: DamageType::from_i32(reader.read_int(32)).unwrap(),
+            visible_bits_damage: DamageType::from_bits_truncate(reader.read_int(32)),
             vec_from: reader.read_vec3(),
         }
     }
 }
 
-pub struct EmptyUserMessage;
-
+#[derive(PartialEq)]
 pub struct EntityPortalled {
     portal: EHandle,
     portalled: EHandle,
@@ -154,6 +199,7 @@ impl EntityPortalled {
     }
 }
 
+#[derive(PartialEq)]
 pub struct Fade {
     duration: f32,
     hold_time: i32,
@@ -169,7 +215,7 @@ impl Fade {
         Self {
             duration: reader.read_int(16) as f32 / (1 << 9) as f32,
             hold_time: reader.read_int(16),
-            flags: FadeFlags::from_i32(reader.read_int(16)).unwrap(),
+            flags: FadeFlags::from_bits_truncate(reader.read_int(16)),
             r: reader.read_int(8),
             g: reader.read_int(8),
             b: reader.read_int(8),
@@ -178,6 +224,7 @@ impl Fade {
     }
 }
 
+#[derive(PartialEq)]
 pub struct Geiger {
     geiger_range: i32,
 }
@@ -189,6 +236,7 @@ impl Geiger {
 }
 
 // this is a chonker
+#[derive(PartialEq)]
 pub struct HudMsgInfo {
     x: f32, y: f32,
     r1: i32, g1: i32, b1: i32, a1: i32,  
@@ -212,6 +260,7 @@ impl HudMsgInfo {
     }
 }
 
+#[derive(PartialEq)]
 pub struct HudMsg {
     channel: HudChannel,
     msg_info: Option<HudMsgInfo>,
@@ -229,6 +278,7 @@ impl HudMsg {
     }
 }
 
+#[derive(PartialEq)]
 pub struct HudText {
     string: String,
 }
@@ -239,6 +289,7 @@ impl HudText {
     }
 }
 
+#[derive(PartialEq)]
 pub struct KeyHintText {
     count: i32, // should always be 1
     key_string: String,
@@ -250,10 +301,11 @@ impl KeyHintText {
     }
 }
 
+#[derive(PartialEq)]
 pub struct KillCam {
     spec_mode: SpectatorMode,
     target1: i32,
-    target: i32,
+    target2: i32,
     unknown: i32,
 }
 
@@ -262,12 +314,13 @@ impl KillCam {
         Self {
             spec_mode: SpectatorMode::from_i32(reader.read_int(8)).unwrap(),
             target1: reader.read_int(8),
-            target: reader.read_int(8),
+            target2: reader.read_int(8),
             unknown: reader.read_int(8),
         }
     }
 }
 
+#[derive(PartialEq)]
 pub struct LogoTimeMsg {
     time: f32,
 }
@@ -278,6 +331,7 @@ impl LogoTimeMsg {
     }
 }
 
+#[derive(PartialEq)]
 pub struct MpMapCompleted {
     branch: i32,
     level: i32,
@@ -291,6 +345,7 @@ impl MpMapCompleted {
 
 pub struct MpMapCompletedData; // p2 specific so im not gonna bother yet
 
+#[derive(PartialEq)]
 pub struct MpTauntEarned {
     taunt_name: String,
     award_silently: bool,
@@ -302,6 +357,7 @@ impl MpTauntEarned {
     }
 }
 
+#[derive(PartialEq)]
 pub struct MpTauntLocked {
     taunt_name: String,
 }
@@ -312,9 +368,10 @@ impl MpTauntLocked {
     }
 }
 
+#[derive(PartialEq)]
 pub struct PaintEntity {
     ent: EHandle,
-    paint_type: PaintType, // this is actually a value of type PaintType in untitledparser but idk what that is
+    paint_type: PaintType,
     pos: Vec3,
 }
 
@@ -328,6 +385,7 @@ impl PaintEntity {
     }
 }
 
+#[derive(PartialEq)]
 pub struct PaintWorld {
     paint_type: PaintType,
     ehandle: EHandle,
@@ -374,6 +432,7 @@ pub struct PortalFxSurface {
     angles: Vec3,
 }
 
+#[derive(PartialEq)]
 pub struct ResetHUD {
     unknown: i32,
 }
@@ -384,6 +443,7 @@ impl ResetHUD {
     }
 }
 
+#[derive(PartialEq)]
 pub struct Rumble {
     rumble_type: RumbleLookup,
     scale: f32,
@@ -395,11 +455,12 @@ impl Rumble {
         Self {
             rumble_type: RumbleLookup::from_i32(reader.read_int(8)).unwrap(),
             scale: reader.read_int(8) as f32 / 100.0,
-            rumble_flags: RumbleFlags::from_i32(reader.read_int(8)).unwrap(),
+            rumble_flags: RumbleFlags::from_bits_truncate(reader.read_int(8)),
         }
     }
 }
 
+#[derive(PartialEq)]
 pub struct SayText {
     client_id: i32,
     text: String,
@@ -416,6 +477,7 @@ impl SayText {
     }
 }
 
+#[derive(PartialEq)]
 pub struct SayText2 {
     client: i32,
     wants_to_chat: bool,
@@ -438,6 +500,7 @@ impl SayText2 {
     }
 }
 
+#[derive(PartialEq)]
 pub struct ScoreboardTempUpdate {
     num_portals: i32,
     time_taken: i32, // centi-seconds
@@ -449,6 +512,7 @@ impl ScoreboardTempUpdate {
     }
 }
 
+#[derive(PartialEq)]
 pub struct Shake {
     command: ShakeCommand,
     amplitude: f32,
@@ -467,6 +531,7 @@ impl Shake {
     }
 }
 
+#[derive(PartialEq)]
 pub struct TextMsg {
     destination: TextMsgDestination,
     messages: Vec<String>,
@@ -477,7 +542,7 @@ impl TextMsg {
         let destination = TextMsgDestination::from_i32(reader.read_int(8)).unwrap();
         let mut messages: Vec<String> = Vec::new();
     
-        for _ in 0..4 {
+        for _ in 0..5 {
             messages.push(reader.read_ascii_string_nulled());
         }
 
@@ -485,6 +550,7 @@ impl TextMsg {
     }
 }
 
+#[derive(PartialEq)]
 pub struct Train {
     pos: i32,
 }
@@ -495,6 +561,7 @@ impl Train {
     }
 }
 
+#[derive(PartialEq)]
 pub struct TransitionFade {
     seconds: f32,
 }
@@ -505,8 +572,7 @@ impl TransitionFade {
     }
 }
 
-pub struct UnknownUserMessage;
-
+#[derive(PartialEq)]
 pub struct VguiMenu {
     message: String,
     show: bool,
@@ -533,11 +599,13 @@ impl VguiMenu {
 
 
 // for VoiceMask user message
+#[derive(PartialEq)]
 pub struct PlayerMask {
     pub game_rules_mask: i32,
     pub ban_mask: i32,
 }
 
+#[derive(PartialEq)]
 pub struct VoiceMask {
     voice_max_players: i32,
     player_masks: Vec<PlayerMask>,
@@ -557,8 +625,7 @@ impl VoiceMask {
     }
 }
 
-pub struct WitchBloodSplatter; // no clue how ReadVectorCoords() works in untitledparser so im not gonna parse this one yet
-
+#[derive(PartialEq)]
 pub struct HapPunch {
     f1: f32, f2: f32, f3: f32,
 }
@@ -569,7 +636,7 @@ impl HapPunch {
     }
 }
 
-
+#[derive(PartialEq)]
 pub struct HapSetConstForce {
     s1: i32, s2: i32, s3: i32,
 }
@@ -580,6 +647,7 @@ impl HapSetConstForce {
     }
 }
 
+#[derive(PartialEq)]
 pub struct HapSetDrag {
     unknown: f32,
 }
@@ -590,6 +658,7 @@ impl HapSetDrag {
     }
 }
 
+#[derive(PartialEq)]
 pub struct SpHapWeaponEvent {
     unk: i32,
 }
@@ -603,7 +672,7 @@ impl SpHapWeaponEvent {
 // enums (various flags and types)
 
 enum_from_primitive! {
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     pub enum CloseCaptionFlags {
         None, 
         WarnIfMissing,
@@ -613,58 +682,68 @@ enum_from_primitive! {
     }
 }
 
-enum_from_primitive! {
-    #[derive(Debug)]
-    pub enum DamageType {
-        None = -1,
-        DmgGeneric             = 0,
-        DmgCrush               = 1 << 0,
-        DmgBullet              = 1 << 1,
-        DmgSlash               = 1 << 2,
-        DmgBurn                = 1 << 3,
-        DmgVehicle             = 1 << 4,
-        DmgFall                = 1 << 5,
-        DmgBlast               = 1 << 6,
-        DmgClub                = 1 << 7,
-        DmgShock               = 1 << 8,
-        DmgSonic               = 1 << 9,
-        DmgEnergyBeam          = 1 << 10,
-        DmgPreventPhysicsForce = 1 << 11,
-        DmgNeverGib            = 1 << 12,
-        DmgAlwaysGib           = 1 << 13,
-        DmgDrown               = 1 << 14,
-        DmgParalyze            = 1 << 15,
-        DmgNerveGas            = 1 << 16,
-        DmgPoison              = 1 << 17,
-        DmgRadiation           = 1 << 18,
-        DmgDrownRecover        = 1 << 19,
-        DmgAcid                = 1 << 20,
-        DmgSlowBurn            = 1 << 21,
-        DmgRemoveNoRagdoll     = 1 << 22,
-        DmgPhysGun             = 1 << 23,
-        DmgPlasma              = 1 << 24,
-        DmgAirboat             = 1 << 25,
-        DmgDissolve            = 1 << 26,
-        DmgBlastSurface        = 1 << 27,
-        DmgDirect              = 1 << 28,
-        DmgBuckshot            = 1 << 29,
+bitflags! {
+    #[derive(Debug, PartialEq)]
+    struct DamageType : i32 {
+        const None = -1;
+        const DmgGeneric             = 0;
+        const DmgCrush               = 1 << 0;
+        const DmgBullet              = 1 << 1;
+        const DmgSlash               = 1 << 2;
+        const DmgBurn                = 1 << 3;
+        const DmgVehicle             = 1 << 4;
+        const DmgFall                = 1 << 5;
+        const DmgBlast               = 1 << 6;
+        const DmgClub                = 1 << 7;
+        const DmgShock               = 1 << 8;
+        const DmgSonic               = 1 << 9;
+        const DmgEnergyBeam          = 1 << 10;
+        const DmgPreventPhysicsForce = 1 << 11;
+        const DmgNeverGib            = 1 << 12;
+        const DmgAlwaysGib           = 1 << 13;
+        const DmgDrown               = 1 << 14;
+        const DmgParalyze            = 1 << 15;
+        const DmgNerveGas            = 1 << 16;
+        const DmgPoison              = 1 << 17;
+        const DmgRadiation           = 1 << 18;
+        const DmgDrownRecover        = 1 << 19;
+        const DmgAcid                = 1 << 20;
+        const DmgSlowBurn            = 1 << 21;
+        const DmgRemoveNoRagdoll     = 1 << 22;
+        const DmgPhysGun             = 1 << 23;
+        const DmgPlasma              = 1 << 24;
+        const DmgAirboat             = 1 << 25;
+        const DmgDissolve            = 1 << 26;
+        const DmgBlastSurface        = 1 << 27;
+        const DmgDirect              = 1 << 28;
+        const DmgBuckshot            = 1 << 29;
     }
+
+    #[derive(Debug, PartialEq)]
+    pub struct FadeFlags: i32 {
+        const None = 0;
+        const FadeIn = 1;
+        const FadeOut = 1 << 1;
+        const Modulate = 1 << 2;
+        const StayOut = 1 << 3;
+        const Purge = 1 << 4;
+    }
+
+    #[derive(Debug, PartialEq)]
+    struct RumbleFlags : i32 {
+		const None            = 0;
+		const Stop            = 1;
+		const Loop            = 1 << 1;
+		const Restart         = 1 << 2;
+		const UpdateScale     = 1 << 3; // Apply DATA to this effect if already playing, but don't restart.   <-- DATA is scale * 100
+		const OnlyOne         = 1 << 4; // Don't play this effect if it is already playing.
+		const RandomAmplitude = 1 << 5; // Amplitude scale will be randomly chosen. Between 10% and 100%
+		const InitialScale    = 1 << 6; // Data is the initial scale to start this effect ( * 100 )
+	}
 }
 
 enum_from_primitive! {
-    #[derive(Debug)]
-    pub enum FadeFlags {
-        None = 0,
-        FadeIn = 1,
-        FadeOut = 1 << 1,
-        Modulate = 1 << 2,
-        StayOut = 1 << 3,
-        Purge = 1 << 4,
-    }
-}
-
-enum_from_primitive! {
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     pub enum HudMsgEffect {
         Fade = 0,
         Flicker = 1,
@@ -673,7 +752,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
     pub enum HudChannel {
         NetMessage1 = 0,
         NetMessage2,
@@ -685,7 +764,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-#[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     pub enum SpectatorMode {
         None,      // not in spectator mode
         DeathCam,  // special mode for death cam animation
@@ -698,7 +777,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     pub enum PortalFizzleType {
         PortalFizzleSuccess = 0, // Placed fine (no fizzle)
         PortalFizzleCantFit,
@@ -715,7 +794,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     pub enum PaintType {
         JumpPaint,
         SpeedPaintOther,
@@ -726,7 +805,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     #[allow(non_camel_case_types)]
     pub enum RumbleLookup {
         RumbleInvalid = -1,
@@ -754,21 +833,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    #[derive(Debug)]
-    pub enum RumbleFlags {
-		None            = 0,
-		Stop            = 1,
-		Loop            = 1 << 1,
-		Restart         = 1 << 2,
-		UpdateScale     = 1 << 3, // Apply DATA to this effect if already playing, but don't restart.   <-- DATA is scale * 100
-		OnlyOne         = 1 << 4, // Don't play this effect if it is already playing.
-		RandomAmplitude = 1 << 5, // Amplitude scale will be randomly chosen. Between 10% and 100%
-		InitialScale    = 1 << 6  // Data is the initial scale to start this effect ( * 100 )
-	}
-}
-
-enum_from_primitive! {
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     pub enum ShakeCommand {
         Start = 0,  // Starts the screen shake for all players within the radius.
         Stop,       // Stops the screen shake for all players within the radius.
@@ -780,11 +845,508 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     pub enum TextMsgDestination {
 		PrintNotify = 1,
 		PrintConsole,
 		PrintTalk,
 		PrintCenter
 	}
+}
+
+// implementing Into<type> for every type in the UserMessageDataType enum (needed for printing)
+
+impl Into<AchievementEvent> for UserMessageDataType {
+    fn into(self) -> AchievementEvent {
+        match self {
+            UserMessageDataType::AchievementEvent(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<Battery> for UserMessageDataType {
+    fn into(self) -> Battery {
+        match self {
+            UserMessageDataType::Battery(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<CloseCaption> for UserMessageDataType {
+    fn into(self) -> CloseCaption {
+        match self {
+            UserMessageDataType::CloseCaption(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<Damage> for UserMessageDataType {
+    fn into(self) -> Damage {
+        match self {
+            UserMessageDataType::Damage(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<EntityPortalled> for UserMessageDataType {
+    fn into(self) -> EntityPortalled {
+        match self {
+            UserMessageDataType::EntityPortalled(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<Fade> for UserMessageDataType {
+    fn into(self) -> Fade {
+        match self {
+            UserMessageDataType::Fade(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<Geiger> for UserMessageDataType {
+    fn into(self) -> Geiger {
+        match self {
+            UserMessageDataType::Geiger(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<HudMsg> for UserMessageDataType {
+    fn into(self) -> HudMsg {
+        match self {
+            UserMessageDataType::HudMsg(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<HudText> for UserMessageDataType {
+    fn into(self) -> HudText {
+        match self {
+            UserMessageDataType::HudText(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<KeyHintText> for UserMessageDataType {
+    fn into(self) -> KeyHintText {
+        match self {
+            UserMessageDataType::KeyHintText(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<KillCam> for UserMessageDataType {
+    fn into(self) -> KillCam {
+        match self {
+            UserMessageDataType::KillCam(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<LogoTimeMsg> for UserMessageDataType {
+    fn into(self) -> LogoTimeMsg {
+        match self {
+            UserMessageDataType::LogoTimeMsg(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<MpMapCompleted> for UserMessageDataType {
+    fn into(self) -> MpMapCompleted {
+        match self {
+            UserMessageDataType::MpMapCompleted(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<MpTauntEarned> for UserMessageDataType {
+    fn into(self) -> MpTauntEarned {
+        match self {
+            UserMessageDataType::MpTauntEarned(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<MpTauntLocked> for UserMessageDataType {
+    fn into(self) -> MpTauntLocked {
+        match self {
+            UserMessageDataType::MpTauntLocked(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<PaintEntity> for UserMessageDataType {
+    fn into(self) -> PaintEntity {
+        match self {
+            UserMessageDataType::PaintEntity(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<PaintWorld> for UserMessageDataType {
+    fn into(self) -> PaintWorld {
+        match self {
+            UserMessageDataType::PaintWorld(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<ResetHUD> for UserMessageDataType {
+    fn into(self) -> ResetHUD {
+        match self {
+            UserMessageDataType::ResetHUD(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<Rumble> for UserMessageDataType {
+    fn into(self) -> Rumble {
+        match self {
+            UserMessageDataType::Rumble(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<SayText> for UserMessageDataType {
+    fn into(self) -> SayText {
+        match self {
+            UserMessageDataType::SayText(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<SayText2> for UserMessageDataType {
+    fn into(self) -> SayText2 {
+        match self {
+            UserMessageDataType::SayText2(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<ScoreboardTempUpdate> for UserMessageDataType {
+    fn into(self) -> ScoreboardTempUpdate {
+        match self {
+            UserMessageDataType::ScoreboardTempUpdate(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<Shake> for UserMessageDataType {
+    fn into(self) -> Shake {
+        match self {
+            UserMessageDataType::Shake(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<TextMsg> for UserMessageDataType {
+    fn into(self) -> TextMsg {
+        match self {
+            UserMessageDataType::TextMsg(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<Train> for UserMessageDataType {
+    fn into(self) -> Train {
+        match self {
+            UserMessageDataType::Train(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<TransitionFade> for UserMessageDataType {
+    fn into(self) -> TransitionFade {
+        match self {
+            UserMessageDataType::TransitionFade(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<VguiMenu> for UserMessageDataType {
+    fn into(self) -> VguiMenu {
+        match self {
+            UserMessageDataType::VguiMenu(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<VoiceMask> for UserMessageDataType {
+    fn into(self) -> VoiceMask {
+        match self {
+            UserMessageDataType::VoiceMask(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<HapPunch> for UserMessageDataType {
+    fn into(self) -> HapPunch {
+        match self {
+            UserMessageDataType::HapPunch(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<HapSetConstForce> for UserMessageDataType {
+    fn into(self) -> HapSetConstForce {
+        match self {
+            UserMessageDataType::HapSetConstForce(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<HapSetDrag> for UserMessageDataType {
+    fn into(self) -> HapSetDrag {
+        match self {
+            UserMessageDataType::HapSetDrag(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<SpHapWeaponEvent> for UserMessageDataType {
+    fn into(self) -> SpHapWeaponEvent {
+        match self {
+            UserMessageDataType::SpHapWeaponEvent(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+// writing the usermessage data to the dump
+#[allow(unused)]
+pub fn write_usermsg_data_to_file(msg: UserMessage, file: &mut File) {
+    match msg.msg_type {
+        UserMessageType::AchievementEvent => {
+            let data: AchievementEvent = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tAchievement ID: {}", data.achievement_id));
+        },
+        UserMessageType::Battery => {
+            let data: Battery = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tBattery Value: {}", data.battery_val));
+        },
+        UserMessageType::CloseCaption => {
+            let data: CloseCaption = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tToken Name: {}", data.token_name));
+            file.write_fmt(format_args!("\n\t\t\tDuration: {}", data.duration));
+            file.write_fmt(format_args!("\n\t\t\tFlags: {:?}", data.flags));
+        },
+        UserMessageType::Damage => {
+            let data: Damage = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tArmor: {}", data.armor));
+            file.write_fmt(format_args!("\n\t\t\tDamage Taken: {}", data.damage_taken));
+            file.write_fmt(format_args!("\n\t\t\tVisible Bits Damage: {:?}", data.visible_bits_damage));
+            file.write_fmt(format_args!("\n\t\t\tVec From: {}", data.vec_from));
+        },
+        UserMessageType::EntityPortalled => {
+            let data: EntityPortalled = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tPortal: {}", data.portal));
+            file.write_fmt(format_args!("\n\t\t\tPortalled: {}", data.portalled));
+            file.write_fmt(format_args!("\n\t\t\tNew Position: {}", data.new_position));
+            file.write_fmt(format_args!("\n\t\t\tNew Angles: {}", data.new_angles));
+        },
+        UserMessageType::Fade => {
+            let data: Fade = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tDuration: {}", data.duration));
+            file.write_fmt(format_args!("\n\t\t\tHold Time: {}", data.hold_time));
+            file.write_fmt(format_args!("\n\t\t\tFlags: {:?}", data.flags));
+            file.write_fmt(format_args!("\n\t\t\tRGBA: {}, {}, {}, {}", data.r, data.g, data.b, data.a));
+        },
+        UserMessageType::Geiger => {
+            let data: Geiger = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tGeiger Range: {}", data.geiger_range));
+        },
+        UserMessageType::HudMsg => {
+            let data: HudMsg = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tChannel: {:?}", data.channel));
+            let msg_info = data.msg_info.unwrap();
+            file.write_fmt(format_args!("\n\t\t\tMessage Info:", ));
+            file.write_fmt(format_args!("\n\t\t\t\tX, Y: {}, {}", msg_info.x, msg_info.y));
+            file.write_fmt(format_args!("\n\t\t\t\tRGBA 1: {}, {}, {}, {}", msg_info.r1, msg_info.g1, msg_info.b1, msg_info.a1));
+            file.write_fmt(format_args!("\n\t\t\t\tRGBA 1: {}, {}, {}, {}", msg_info.r2, msg_info.g2, msg_info.b2, msg_info.a2));
+            file.write_fmt(format_args!("\n\t\t\t\tEffect: {:?}", msg_info.effect));
+            file.write_fmt(format_args!("\n\t\t\t\tFade In, Fade Out: {}, {}", msg_info.fade_in, msg_info.fade_out));
+            file.write_fmt(format_args!("\n\t\t\t\tHold Time, Fx Time: {}, {}", msg_info.hold_time, msg_info.fx_time));
+            file.write_fmt(format_args!("\n\t\t\t\tMessage: {}", msg_info.message));
+        },
+        UserMessageType::HudText => {
+            let data: HudText = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tString: {}", data.string));
+        },
+        UserMessageType::KeyHintText => {
+            let data: KeyHintText = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tCount: {}", data.count));
+            file.write_fmt(format_args!("\n\t\t\tKey String: {}", data.key_string));
+        },
+        UserMessageType::KillCam => {
+            let data: KillCam = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tSpectator Mode: {:?}", data.spec_mode));
+            file.write_fmt(format_args!("\n\t\t\tTarget 1: {}", data.target1));
+            file.write_fmt(format_args!("\n\t\t\tTarget 2: {}", data.target2));
+            file.write_fmt(format_args!("\n\t\t\tUnknown Byte: {}", data.unknown));
+        },
+        UserMessageType::LogoTimeMsg => {
+            let data: LogoTimeMsg = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tTime: {}", data.time));
+        },
+        UserMessageType::MpMapCompleted => {
+            let data: MpMapCompleted = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tBranch: {}", data.branch));
+            file.write_fmt(format_args!("\n\t\t\tLevel: {}", data.level));
+        },
+        UserMessageType::MpTauntEarned => {
+            let data: MpTauntEarned = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tTaunt Name: {}", data.taunt_name));
+            file.write_fmt(format_args!("\n\t\t\tAward Silently: {}", data.award_silently));
+        },
+        UserMessageType::MpTauntLocked => {
+            let data: MpTauntLocked = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tTaunt Name: {}", data.taunt_name));
+        },
+        UserMessageType::PaintEntity => {
+            let data: PaintEntity = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tEntity: {}", data.ent));
+            file.write_fmt(format_args!("\n\t\t\tPaint Type: {:?}", data.paint_type));
+            file.write_fmt(format_args!("\n\t\t\tPos: {}", data.pos));
+        },
+        UserMessageType::PaintWorld => {
+            let data: PaintWorld = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tPaint Type: {:?}", data.paint_type));
+            file.write_fmt(format_args!("\n\t\t\tEntity: {}", data.ehandle));
+            file.write_fmt(format_args!("\n\t\t\tUnknown HF1: {}", data.unkhf1));
+            file.write_fmt(format_args!("\n\t\t\tUnknown HF2: {}", data.unkhf2));
+            file.write_fmt(format_args!("\n\t\t\tLength: {}", data.length));
+            file.write_fmt(format_args!("\n\t\t\tCenter: {}", data.center));
+            file.write_all("\n\t\t\tPositions: [".as_bytes());
+            let mut pos_str: String = String::new();
+            for i in 0..data.length {
+                pos_str.push_str(&data.positions[i as usize].to_string());
+                pos_str.push_str(", ");
+            }
+            file.write_fmt(format_args!("{}]", pos_str[..pos_str.len()-2].to_string()));
+        },
+        UserMessageType::ResetHUD => {
+            let data: ResetHUD = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tUnknown Byte: {}", data.unknown));
+        },
+        UserMessageType::Rumble => {
+            let data: Rumble = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tRumble Type: {:?}", data.rumble_type));
+            file.write_fmt(format_args!("\n\t\t\tScale: {}", data.scale));
+            file.write_fmt(format_args!("\n\t\t\tRumble Flags: {:?}", data.rumble_flags));
+        },
+        UserMessageType::SayText => {
+            let data: SayText = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tClient ID: {}", data.client_id));
+            file.write_fmt(format_args!("\n\t\t\tText: {}", data.text));
+            file.write_fmt(format_args!("\n\t\t\tWants To Chat: {}", data.wants_to_chat));
+        },
+        UserMessageType::SayText2 => {
+            let data: SayText2 = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tClient: {}", data.client));
+            file.write_fmt(format_args!("\n\t\t\tWants To Chat: {}", data.wants_to_chat));
+            file.write_fmt(format_args!("\n\t\t\tMessage Name: {}", data.msg_name));
+            file.write_all("\n\t\t\tMessages:".as_bytes());
+            for i in 0..4 {
+                file.write_fmt(format_args!("\n\t\t\t\t{}", data.msgs[i]));
+            }
+        },
+        UserMessageType::ScoreboardTempUpdate => {
+            let data: ScoreboardTempUpdate = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tNum Portals: {}", data.num_portals));
+            file.write_fmt(format_args!("\n\t\t\tTime Taken: {}", data.time_taken as f32 / 100.0));
+        },
+        UserMessageType::Shake => {
+            let data: Shake = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tCommand: {:?}", data.command));
+            file.write_fmt(format_args!("\n\t\t\tAmplitude: {}", data.amplitude));
+            file.write_fmt(format_args!("\n\t\t\tFrequency: {}", data.frequency));
+            file.write_fmt(format_args!("\n\t\t\tDuration: {}", data.duration));
+        },
+        UserMessageType::TextMsg => {
+            let data: TextMsg = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tDestination: {:?}", data.destination));
+            file.write_all("\n\t\t\tMessages:".as_bytes());
+            for i in 0..5 {
+                file.write_fmt(format_args!("\n\t\t\t\t{}: {}", i + 1, data.messages[i].trim_end_matches("\n")));
+            }
+        },
+        UserMessageType::Train => {
+            let data: Train = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tPos: {}", data.pos));
+        },
+        UserMessageType::TransitionFade => {
+            let data: TransitionFade = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tSeconds: {}", data.seconds));
+        },
+        UserMessageType::VguiMenu => {
+            let data: VguiMenu = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tMessage: {}", data.message));
+            file.write_fmt(format_args!("\n\t\t\tShow: {}", data.show));
+            file.write_fmt(format_args!("\n\t\t\tCount: {}", data.count));
+            file.write_all("\n\t\t\tKey Values:".as_bytes());
+            for i in 0..data.count {
+                file.write_fmt(format_args!("\n\t\t\t\t{:?}", data.key_values[i as usize]));
+            }
+        },
+        UserMessageType::VoiceMask => {
+            let data: VoiceMask = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tVoice Max Players: {}", data.voice_max_players));
+            file.write_all("\n\t\t\tPlayer Masks:".as_bytes());
+            for i in 0..data.voice_max_players {
+                file.write_fmt(format_args!("\n\t\t\t\t({}) Game Rules Mask: {}, Ban Mask {}", i, data.player_masks[i as usize].game_rules_mask, data.player_masks[i as usize].ban_mask));
+            }
+            file.write_fmt(format_args!("\n\t\t\tPlayer Mod Enable: {}", data.player_mod_enable));
+        },
+        UserMessageType::HapPunch => {
+            let data: HapPunch = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tF1, F2, F3: {}, {}, {}", data.f1, data.f2, data.f3));
+        },
+        UserMessageType::HapSetDrag => {
+            let data: HapSetDrag = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tUnknown Float: {}", data.unknown));
+        },
+        UserMessageType::SPHapWeaponEvent => {
+            let data: SpHapWeaponEvent = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tUnknown Int: {}", data.unk));
+        },
+        UserMessageType::HapSetConstForce => {
+            let data: HapSetConstForce = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tS1, S2, S3: {}, {}, {}", data.s1, data.s2, data.s3));
+        },
+        _ => {
+            file.write_all("\n\t\t\tDATA UNKNOWN OR NOT IMPLEMENTED".as_bytes());
+        },
+    }
 }
