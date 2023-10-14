@@ -13,8 +13,8 @@ use crate::structs::net_svc_message::NetSvcMessageTypes as nsmt;
 use crate::structs::net_svc_message::NetSvcMessageDataTypes as nsmdt;
 use crate::structs::netsvc_types as nt;
 use crate::structs::utils::GameEventList;
-
-use super::data_manager::DataManager;
+use crate::structs::data_manager::DataManager;
+use crate::structs::user_message::write_usermsg_data_to_file;
 
 pub enum NetSvcMessageDataTypes {
     Unknown,
@@ -449,7 +449,7 @@ pub fn parse(reader: &mut BitReader, demo_data_mgr: &mut DataManager, size: i32)
     while ((start_index + size * 8) - reader.cur_bit_index) > 6 {
         let mut cur_message: NetSvcMessage = NetSvcMessage::new();
 
-        let msg_type = reader.read_int(if demo_data_mgr.network_protocol <= 14 { 5 } else { 6 });
+        let msg_type = reader.read_int(demo_data_mgr.net_svc_type_bits);
 
         cur_message.msg_type = nsmt::from_int(msg_type);
 
@@ -486,7 +486,7 @@ pub fn parse(reader: &mut BitReader, demo_data_mgr: &mut DataManager, size: i32)
             nsmt::SvcSplitScreen => cur_message.data = nsmdt::SvcSplitScreen(nt::SvcSplitScreen::parse(reader)),
             nsmt::SvcTempEntities => cur_message.data = nsmdt::SvcTempEntities(nt::SvcTempEntities::parse(reader)),
             nsmt::SvcUpdateStringTable => cur_message.data = nsmdt::SvcUpdateStringTable(nt::SvcUpdateStringTable::parse(reader)),
-            nsmt::SvcUserMessage => cur_message.data = nsmdt::SvcUserMessage(nt::SvcUserMessage::parse(reader, demo_data_mgr.user_message_list)),
+            nsmt::SvcUserMessage => cur_message.data = nsmdt::SvcUserMessage(nt::SvcUserMessage::parse(reader, demo_data_mgr.user_message_list.clone())),
             nsmt::SvcVoiceData => cur_message.data = nsmdt::SvcVoiceData(nt::SvcVoiceData::parse(reader)),
             nsmt::SvcVoiceInit => cur_message.data = nsmdt::SvcVoiceInit(nt::SvcVoiceInit::parse(reader)),
         };
@@ -669,9 +669,10 @@ pub fn write_msg_data_to_file(file: &mut File, messages: Vec<NetSvcMessage>, dat
             nsmt::SvcUserMessage => {
                 let msg_data: nt::SvcUserMessage = message.data.into();
                 file.write_all("\n\tMessage: SvcUserMessage".as_bytes());
-                file.write_fmt(format_args!("\n\t\tMessage Type: {:?}", msg_data.msg_type));
+                file.write_fmt(format_args!("\n\t\tMessage Type: {:?}", msg_data.data.msg_type));
                 file.write_fmt(format_args!("\n\t\tLength (bits): {}", msg_data.length));
-                file.write_all("\n\t\tNO MORE DATA AVAILABLE (yet)".as_bytes());
+                file.write_all("\n\t\tData:".as_bytes());
+                write_usermsg_data_to_file(msg_data.data, file);
             },
             nsmt::SvcEntityMessage => {
                 let msg_data: nt::SvcEntityMessage = message.data.into();
