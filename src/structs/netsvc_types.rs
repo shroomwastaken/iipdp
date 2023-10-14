@@ -2,8 +2,7 @@ use std::collections::HashMap;
 use crate::bitreader::BitReader;
 use crate::structs::utils;
 use crate::structs::data_manager::DataManager;
-
-use super::user_message::{UserMessageType, UserMessage};
+use crate::structs::{user_message::{UserMessageType, UserMessage}, data_manager::Game};
 
 // contains no data
 pub struct NetNop;
@@ -144,7 +143,7 @@ impl SvcServerInfo {
         let max_classes =  reader.read_int(16);
         let mut map_crc: Option<i32> = None;
         let mut map_md5: Option<Vec<u8>> = None;
-        if data_mgr.network_protocol == 24 {
+        if data_mgr.game == Game::PORTAL_1_1910503 {
             map_md5 = Some(reader.read_bytes(16));
         } else {
             map_crc = Some(reader.read_int(32));
@@ -159,7 +158,7 @@ impl SvcServerInfo {
         let host_name = reader.read_ascii_string_nulled();
 
         let mut has_replay: Option<bool> = None;
-        if data_mgr.network_protocol == 24 {
+        if data_mgr.game == Game::PORTAL_1_1910503 {
             has_replay = Some(reader.read_bool());
         }
 
@@ -248,12 +247,7 @@ impl SvcCreateStringTable {
         let name = reader.read_ascii_string_nulled();
         let max_entries = reader.read_int(16);
         let num_entries = reader.read_int(((max_entries as f32).log2() as i32) + 1);
-        let length: i32;
-        if data_mgr.network_protocol == 24 {
-            length = reader.read_int(32);
-        } else {
-            length = reader.read_int(20);
-        }
+        let length: i32 = reader.read_int(20);
         let user_data_fixed_size = reader.read_bool();
 
         let mut user_data_size: Option<i32> = None;
