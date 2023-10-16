@@ -56,7 +56,7 @@ pub enum UserMessageDataType {
     Fade(Fade), Geiger(Geiger), HudMsg(HudMsg), HudText(HudText),
     KeyHintText(KeyHintText), KillCam(KillCam), LogoTimeMsg(LogoTimeMsg),
     MpMapCompleted(MpMapCompleted), MpTauntEarned(MpTauntEarned), MpTauntLocked(MpTauntLocked),
-    PaintEntity(PaintEntity), PaintWorld(PaintWorld),
+    PaintEntity(PaintEntity), PaintWorld(PaintWorld), PortalFXSurface(PortalFXSurface),
     ResetHUD(ResetHUD), Rumble(Rumble), SayText(SayText), SayText2(SayText2),
     ScoreboardTempUpdate(ScoreboardTempUpdate), Shake(Shake), TextMsg(TextMsg),
     Train(Train), TransitionFade(TransitionFade), VguiMenu(VguiMenu),
@@ -94,6 +94,7 @@ impl UserMessage {
             UserMessageType::MpTauntLocked => UserMessageDataType::MpTauntLocked(MpTauntLocked::parse(reader)),
             UserMessageType::PaintEntity => UserMessageDataType::PaintEntity(PaintEntity::parse(reader)),
             UserMessageType::PaintWorld => UserMessageDataType::PaintWorld(PaintWorld::parse(reader)),
+            UserMessageType::PortalFXSurface => UserMessageDataType::PortalFXSurface(PortalFXSurface::parse(reader)),
             UserMessageType::ResetHUD => UserMessageDataType::ResetHUD(ResetHUD::parse(reader)),
             UserMessageType::Rumble => UserMessageDataType::Rumble(Rumble::parse(reader)),
             UserMessageType::SayText => UserMessageDataType::SayText(SayText::parse(reader)),
@@ -421,15 +422,29 @@ impl PaintWorld {
     }
 }
 
-// not gonna implement this yet because im not sure what the last 2 values are (theyre not vec3 thats a placeholder)
-pub struct PortalFxSurface {
+#[derive(PartialEq)]
+pub struct PortalFXSurface {
     portal_ent: i32,
     owner_ent: i32,
     team: i32,
     portal_num: i32,
     effect: PortalFizzleType,
-    origin: Vec3,
-    angles: Vec3,
+    origin: Vec<Option<f32>>,
+    angles: Vec<Option<f32>>,
+}
+
+impl PortalFXSurface {
+    pub fn parse(reader: &mut BitReader) -> Self {
+        Self { 
+            portal_ent: reader.read_int(16),
+            owner_ent: reader.read_int(16),
+            team: reader.read_int(8),
+            portal_num: reader.read_int(8),
+            effect: PortalFizzleType::from_i32(reader.read_int(8)).unwrap(),
+            origin: reader.read_vector_coords(),
+            angles: reader.read_vector_coords(),
+        }
+    }
 }
 
 #[derive(PartialEq)]
@@ -1009,6 +1024,15 @@ impl Into<PaintWorld> for UserMessageDataType {
     }
 }
 
+impl Into<PortalFXSurface> for UserMessageDataType {
+    fn into(self) -> PortalFXSurface {
+        match self {
+            UserMessageDataType::PortalFXSurface(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
 impl Into<ResetHUD> for UserMessageDataType {
     fn into(self) -> ResetHUD {
         match self {
@@ -1256,6 +1280,25 @@ pub fn write_usermsg_data_to_file(msg: UserMessage, file: &mut File) {
             }
             file.write_fmt(format_args!("{}]", pos_str[..pos_str.len()-2].to_string()));
         },
+        UserMessageType::PortalFXSurface => {
+            let data: PortalFXSurface = msg.data.into();
+            file.write_fmt(format_args!("\n\t\t\tPortal Ent: {}", data.portal_ent));
+            file.write_fmt(format_args!("\n\t\t\tOwner Ent: {}", data.owner_ent));
+            file.write_fmt(format_args!("\n\t\t\tTEam: {}", data.team));
+            file.write_fmt(format_args!("\n\t\t\tPortal Num: {}", data.portal_num));
+            file.write_fmt(format_args!("\n\t\t\tEffect: {:?}", data.effect));
+            file.write_fmt(format_args!("\n\t\t\tOrigin: {}, {}, {}",
+                data.origin[0].map(|i| {i.to_string()}).unwrap_or_else(|| {"Null".to_string()}),
+                data.origin[1].map(|i| {i.to_string()}).unwrap_or_else(|| {"Null".to_string()}),
+                data.origin[2].map(|i| {i.to_string()}).unwrap_or_else(|| {"Null".to_string()}),
+            ));
+
+            file.write_fmt(format_args!("\n\t\t\tAngles: {}, {}, {}",
+                data.angles[0].map(|i| {i.to_string()}).unwrap_or_else(|| {"Null".to_string()}),
+                data.angles[1].map(|i| {i.to_string()}).unwrap_or_else(|| {"Null".to_string()}),
+                data.angles[2].map(|i| {i.to_string()}).unwrap_or_else(|| {"Null".to_string()}),
+            ));
+        }
         UserMessageType::ResetHUD => {
             let data: ResetHUD = msg.data.into();
             file.write_fmt(format_args!("\n\t\t\tUnknown Byte: {}", data.unknown));
