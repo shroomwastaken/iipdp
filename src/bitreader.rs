@@ -95,6 +95,47 @@ impl BitReader {
         return Vec3 { x: self.read_float(32), y: self.read_float(32), z: self.read_float(32) };
     }
 
+    pub fn read_vector_coord(&mut self) -> f32 {
+        const COORD_INTEGER_BITS: i32 = 14;
+        const COORD_FRACTIONAL_BITS: i32 = 5;
+        const COORD_DENOMINATOR: u8 = 1u8 << COORD_FRACTIONAL_BITS;
+        const COORD_RESOLUTION: f32 = 1f32 / (COORD_DENOMINATOR as f32);
+
+        let mut value: f32 = 0f32;
+        let integer = self.read_bool();
+        let fraction = self.read_bool();
+
+        if integer || fraction {
+            let sign = self.read_bool();
+
+            if integer {
+                value += self.read_int(COORD_INTEGER_BITS) as f32;
+            }
+
+            if fraction {
+                value += self.read_float(COORD_FRACTIONAL_BITS) * COORD_RESOLUTION;
+            }
+
+            if sign {
+                value = -value;
+            }
+        }
+
+        return value
+    }
+
+    pub fn read_vector_coords(&mut self) -> Vec<Option<f32>> {
+        let (x, y, z) = (self.read_bool(), self.read_bool(), self.read_bool());
+
+        let mut coords_vec: Vec<Option<f32>> = Vec::new();
+
+        if x { coords_vec.push(Some(self.read_vector_coord())) } else { coords_vec.push(None) }
+        if y { coords_vec.push(Some(self.read_vector_coord())) } else { coords_vec.push(None) }
+        if z { coords_vec.push(Some(self.read_vector_coord())) } else { coords_vec.push(None) }
+        
+        return coords_vec;
+    }
+
     pub fn read_ehandle(&mut self) -> EHandle { return EHandle { val: self.read_int(32)} }
 
     pub fn read_bool(&mut self) -> bool { return self.read_bits(1)[0] == 1; }
