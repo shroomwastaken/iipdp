@@ -166,4 +166,8 @@ impl DataManager {
             _ => self.game = Game::UNKNOWN
         };
     }
+
+    pub fn get_ticks_and_time(&self) -> (i32, f32) {
+        return (self.last_packet_tick, ((self.last_packet_tick as f32) + 1f32) * 0.015)
+    }
 }
