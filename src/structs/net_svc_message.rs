@@ -463,7 +463,7 @@ pub fn parse(reader: &mut BitReader, demo_data_mgr: &mut DataManager, size: i32)
             nsmt::NetSplitScreenUser => cur_message.data = nsmdt::NetSplitScreenUser(nt::NetSplitScreenUser::parse(reader)),
             nsmt::NetStringCmd => cur_message.data = nsmdt::NetStringCmd(nt::NetStringCmd::parse(reader)),
             nsmt::NetTick => cur_message.data = nsmdt::NetTick(nt::NetTick::parse(reader)),
-            nsmt::SvcBspDecal => cur_message.data = nsmdt::SvcBspDecal(nt::SvcBspDecal), // no parsing
+            nsmt::SvcBspDecal => cur_message.data = nsmdt::SvcBspDecal(nt::SvcBspDecal::parse(reader)),
             nsmt::SvcClassInfo => cur_message.data = nsmdt::SvcClassInfo(nt::SvcClassInfo::parse(reader)),
             nsmt::SvcCmdKeyValues => cur_message.data = nsmdt::SvcCmdKeyValues(nt::SvcCmdKeyValues::parse(reader)),
             nsmt::SvcCreateStringTable => cur_message.data = nsmdt::SvcCreateStringTable(nt::SvcCreateStringTable::parse(reader, demo_data_mgr)),
@@ -581,7 +581,16 @@ pub fn write_msg_data_to_file(file: &mut File, messages: Vec<NetSvcMessage>, dat
                 file.write_fmt(format_args!("\n\t\tUnknown: {}", msg_data.unknown));
             },
             nsmt::SvcBspDecal => {
+                let msg_data: nt::SvcBspDecal = message.data.into();
                 file.write_all("\n\tMessage: SvcBspDecal".as_bytes());
+                file.write_fmt(format_args!("\n\t\tPos: {}, {}, {}",
+                    msg_data.pos[0].map(|i| {i.to_string()}).unwrap_or_else(|| {"Null".to_string()}),
+                    msg_data.pos[1].map(|i| {i.to_string()}).unwrap_or_else(|| {"Null".to_string()}),
+                    msg_data.pos[2].map(|i| {i.to_string()}).unwrap_or_else(|| {"Null".to_string()})));
+                file.write_fmt(format_args!("\n\t\tDecal Texture Index: {}", msg_data.decal_texture_index));
+                file.write_fmt(format_args!("\n\t\tEntity Index: {}", msg_data.entity_index.map(|i| {i.to_string()}).unwrap_or_else(|| {"Null".to_string()})));
+                file.write_fmt(format_args!("\n\t\tModel Index: {}", msg_data.model_index.map(|i| {i.to_string()}).unwrap_or_else(|| {"Null".to_string()})));
+                file.write_fmt(format_args!("\n\t\tLow Priority: {}", msg_data.low_priority));
             },
             nsmt::SvcClassInfo => {
                 let msg_data: nt::SvcClassInfo = message.data.into();

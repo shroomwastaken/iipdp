@@ -443,7 +443,31 @@ impl SvcCrosshairAngle {
     }
 }
 
-pub struct SvcBspDecal; // no idea how to parse yet, havent seen in demos so im just gonna not touch it yet
+pub struct SvcBspDecal {
+    pub pos: Vec<Option<f32>>,
+    pub decal_texture_index: i32,
+    pub entity_index: Option<i32>,
+    pub model_index: Option<i32>,
+    pub low_priority: bool,
+}
+
+impl SvcBspDecal {
+    pub fn parse(reader: &mut BitReader) -> Self {
+        let pos = reader.read_vector_coords();
+        let decal_texture_index = reader.read_int(9);
+
+        let mut entity_index: Option<i32> = None;
+        let mut model_index: Option<i32> = None;
+        if reader.read_bool() {
+            entity_index = Some(reader.read_int(11));
+            model_index = Some(reader.read_int(11));
+        }
+
+        let low_priority = reader.read_bool();
+
+        Self { pos: pos, decal_texture_index: decal_texture_index, entity_index: entity_index, model_index: model_index, low_priority: low_priority }
+    }
+}
 
 pub struct SvcSplitScreen {
     pub s_type: i32,
