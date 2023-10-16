@@ -44,3 +44,8 @@ Everything else:
     * Made GameEventList implementation better
 - v0.2.3:
     * Added UserMessage parsing and dumping
+- v0.2.4:
+    * Added SvcBspDecal message parsing
+    * Added PortalFXSurface user message parsing
+    * Added support for parsing directories of demos
+    * Made time formatting nicer
