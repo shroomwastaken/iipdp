@@ -24,17 +24,17 @@ pub fn print_header_info(demo: Demo) {
 
     print!("\n");
 
-    let ticks: f32 = demo.data_manager.last_packet_tick as f32;
-    let time: f32 = (&ticks + 1f32) * 0.015;
+    let ticks_and_time = demo.data_manager.get_ticks_and_time();
 
-    println!("Measured Ticks: {}",  (ticks + 1f32) as i32);
+    println!("Measured Ticks: {}",  (ticks_and_time.0 + 1));
 
-    if time < 60f32 {
-        println!("Measured Time: {}", format!("{:.3}", time));
+    if ticks_and_time.1 < 60f32 {
+        println!("Measured Time: {}", format!("{:.3}", ticks_and_time.1));
     } else {
-        let minutes = (time / 60f32).floor();
-        let seconds = time - (60f32 * minutes);
-        println!("Measured TIme: {}", format!("{}:{:.3}", minutes, seconds));
+        let minutes = (ticks_and_time.1 / 60f32).floor();
+        let seconds = (ticks_and_time.1 - (60f32 * minutes)).floor();
+        let millis = (ticks_and_time.1 - (60f32 * minutes)).fract();
+        println!("Measured Time: {}", format!("{}:{:02}.{:.0}", minutes, seconds, millis * 1000.0));
     }
 }
 
