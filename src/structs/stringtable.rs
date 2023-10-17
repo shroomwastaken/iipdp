@@ -1,6 +1,8 @@
+use std::fs::File;
+use std::io::Write;
 use bitflags::bitflags;
-
 use crate::bitreader::BitReader;
+use crate::structs::packet_data_types::StringTables;
 
 // all of this information is from UntitledParser
 
@@ -41,19 +43,19 @@ impl StringTable {
 
 pub struct StringTableEntry {
     pub name: String,
-    pub entry_data: Option<StringTableEntryDataTypes>
+    pub entry_data: StringTableEntryDataTypes
 }
 
 impl StringTableEntry {
     pub fn new() -> Self {
-        Self { name: "".to_string(), entry_data: None }
+        Self { name: "".to_string(), entry_data: StringTableEntryDataTypes::None }
     }
 
     pub fn parse(&mut self, reader: &mut BitReader, table_name: String) {
         self.name = reader.read_ascii_string_nulled();
         if reader.read_bool() {
             let length = reader.read_int(16);
-            self.entry_data = Some(self.parse_entry_data(reader, table_name, length));
+            self.entry_data = self.parse_entry_data(&mut reader.split_and_skip(length * 8), table_name, length);
         }
     }
 
@@ -75,6 +77,7 @@ impl StringTableEntry {
 
 // all of the currently implemented data types
 pub enum StringTableEntryDataTypes {
+    None,
     Unknown,
     PlayerInfo(PlayerInfo),
     QueryPort(QueryPort),
@@ -176,7 +179,7 @@ pub struct LightStyle {
 impl LightStyle {
     pub fn parse(reader: &mut BitReader) -> Self {
         let str = reader.read_ascii_string_nulled();
-        let mut values: Vec<u8> = str.chars().map(|c| ((c as u32 - 'a' as u32) * 22) as u8).collect::<_>(); // idk
+        let values: Vec<u8> = str.chars().map(|c| ((c as u32 - 'a' as u32) * 22) as u8).collect::<_>(); // idk
         Self { values: values }
     }
 }
@@ -198,4 +201,10 @@ bitflags! {
         const FatalIfMissing = 1;
         const Preload = 1 << 1;
     }
+}
+
+#[allow(unused)]
+pub fn write_stringtables_data_to_file(file: &mut File, data: StringTables) {
+    file.write_fmt(format_args!("\tData Size (bytes): {}\n", data.size));
+    file.write_fmt(format_args!("\tTable Count: {}", data.table_count));
 }

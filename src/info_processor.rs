@@ -3,6 +3,7 @@ use crate::structs::packet::PacketType;
 use crate::structs::{packet_data_types as pdt, net_svc_message};
 use crate::structs::cmd_info::CmdInfo;
 use crate::structs::user_cmd_info::UserCmdInfo;
+use crate::structs::stringtable::write_stringtables_data_to_file;
 use std::path::Path;
 use std::fs;
 use std::io::Write;
@@ -178,8 +179,7 @@ pub fn dump_file(file_path: &String, demo: Demo) {
         } else if cur_packet_type == PacketType::StringTables {
             let packet_data: pdt::StringTables = packet.data.into();
             file.write_fmt(format_args!("[{}] STRINGTABLES (8)\n", packet.tick));
-            file.write_fmt(format_args!("\tData Size (bytes): {}\n", packet_data.size));
-            file.write_all("\tNO DATA AVAILABLE YET\n".as_bytes());
+            write_stringtables_data_to_file(&mut file, packet_data);
         } else if cur_packet_type == PacketType::Unknown {
             file.write_fmt(format_args!("[{}] Unknown packet type (most likely a bug)\n", packet.tick));
         }

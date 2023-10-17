@@ -90,7 +90,7 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
 
             data.table_count = reader.read_int(8);
 
-            for i in 0..data.table_count {
+            for _ in 0..data.table_count {
                 data.tables.push(StringTable::parse(reader));
             }
             
