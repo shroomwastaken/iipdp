@@ -9,3 +9,4 @@ pub mod utils;
 pub mod data_manager;
 pub mod netsvc_types;
 pub mod user_message;
+pub mod stringtable;
