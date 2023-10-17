@@ -699,7 +699,7 @@ enum_from_primitive! {
 
 bitflags! {
     #[derive(Debug, PartialEq)]
-    struct DamageType : i32 {
+    pub struct DamageType : i32 {
         const None = -1;
         const DmgGeneric             = 0;
         const DmgCrush               = 1 << 0;
@@ -745,7 +745,7 @@ bitflags! {
     }
 
     #[derive(Debug, PartialEq)]
-    struct RumbleFlags : i32 {
+    pub struct RumbleFlags : i32 {
 		const None            = 0;
 		const Stop            = 1;
 		const Loop            = 1 << 1;
