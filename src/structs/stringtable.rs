@@ -76,6 +76,7 @@ impl StringTableEntry {
 }
 
 // all of the currently implemented data types
+#[derive(PartialEq)]
 pub enum StringTableEntryDataTypes {
     None,
     Unknown,
@@ -88,26 +89,25 @@ pub enum StringTableEntryDataTypes {
 
 pub struct StringTableClass {
     pub name: String,
-    pub length: i32,
     pub data: String,
 }
 
 impl StringTableClass {
     pub fn new() -> Self {
-        Self { name: "".to_string(), length: 0, data: "".to_string() }
+        Self { name: "".to_string(), data: "".to_string() }
     }
 
     pub fn parse(&mut self, reader: &mut BitReader) {
         self.name = reader.read_ascii_string_nulled();
         if reader.read_bool() {
-            self.length = reader.read_int(16);
-            self.data = reader.read_ascii_string(self.length * 8);
+            let length = reader.read_int(16);
+            self.data = reader.read_ascii_string(length * 8);
         }
     }
 }
 
 // entry data types
-
+#[derive(PartialEq)]
 pub struct PlayerInfo {
     // steam id stuff only exists on demo protocol 4 so im not gonna bother yet
     pub name: String, // scoreboard info
@@ -150,6 +150,7 @@ impl PlayerInfo {
     }
 }
 
+#[derive(PartialEq)]
 pub struct QueryPort {
     pub port: i32,
 }
@@ -162,6 +163,7 @@ impl QueryPort {
 
 pub struct InstanceBaseline; // not until i do datatable stuff
 
+#[derive(PartialEq)]
 pub struct StringEntryData {
     pub str: String,
 }
@@ -172,6 +174,7 @@ impl StringEntryData {
     }
 }
 
+#[derive(PartialEq)]
 pub struct LightStyle {
     pub values: Vec<u8>,
 }
@@ -184,6 +187,7 @@ impl LightStyle {
     }
 }
 
+#[derive(PartialEq)]
 pub struct PrecacheData {
     pub flags: PrecacheFlags,
 }
@@ -195,7 +199,7 @@ impl PrecacheData {
 }
 
 bitflags! {
-    #[derive(Debug)]
+    #[derive(Debug, PartialEq)]
     pub struct PrecacheFlags: i32 {
         const None = 0;
         const FatalIfMissing = 1;
@@ -203,8 +207,108 @@ bitflags! {
     }
 }
 
+// impl into<type> for stringtableentrydatatypes is needed for dumping
+
+impl Into<PlayerInfo> for StringTableEntryDataTypes {
+    fn into(self) -> PlayerInfo {
+        match self {
+            StringTableEntryDataTypes::PlayerInfo(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<LightStyle> for StringTableEntryDataTypes {
+    fn into(self) -> LightStyle {
+        match self {
+            StringTableEntryDataTypes::LightStyle(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<PrecacheData> for StringTableEntryDataTypes {
+    fn into(self) -> PrecacheData {
+        match self {
+            StringTableEntryDataTypes::PrecacheData(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<StringEntryData> for StringTableEntryDataTypes {
+    fn into(self) -> StringEntryData {
+        match self {
+            StringTableEntryDataTypes::StringEntryData(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+impl Into<QueryPort> for StringTableEntryDataTypes {
+    fn into(self) -> QueryPort {
+        match self {
+            StringTableEntryDataTypes::QueryPort(value) => value,
+            _ => panic!("how are you even seeing this?"),
+        }
+    }
+}
+
+
 #[allow(unused)]
 pub fn write_stringtables_data_to_file(file: &mut File, data: StringTables) {
-    file.write_fmt(format_args!("\tData Size (bytes): {}\n", data.size));
-    file.write_fmt(format_args!("\tTable Count: {}", data.table_count));
+    file.write_fmt(format_args!("\tData Size (bytes): {}", data.size));
+    file.write_fmt(format_args!("\n\tTable Count: {}", data.table_count));
+    for table in data.tables {
+        file.write_fmt(format_args!("\n\tTable Name: {}", table.name));
+        file.write_fmt(format_args!("\n\t\t{} table entries", table.entry_count));
+        for entry in table.table_entries {
+            if entry.entry_data != StringTableEntryDataTypes::None {
+                if table.name.contains("precache") {
+                    let entry_data: PrecacheData = entry.entry_data.into();
+                    file.write_fmt(format_args!("\n\t\t\t{}: {:?}", entry.name, entry_data.flags));
+                } else if table.name == "GameRulesCreation" || table.name == "InfoPanel" {
+                    let entry_data: StringEntryData = entry.entry_data.into();
+                    file.write_fmt(format_args!("\n\t\t\tEntry Name: {}, Data: {}", entry.name, entry_data.str));
+                } else if table.name == "userinfo" {
+                    let entry_data: PlayerInfo = entry.entry_data.into();
+                    file.write_fmt(format_args!("\n\t\t\tEntry Name: {}", entry.name));
+                    file.write_fmt(format_args!("\n\t\t\t\tName: {}", entry_data.name));
+                    file.write_fmt(format_args!("\n\t\t\t\tUser ID: {}", entry_data.user_id));
+                    file.write_fmt(format_args!("\n\t\t\t\tGUID: {}", entry_data.guid));
+                    file.write_fmt(format_args!("\n\t\t\t\tFriends ID: {}", entry_data.friends_id));
+                    file.write_fmt(format_args!("\n\t\t\t\tFriends Name: {}", entry_data.friends_name));
+                    file.write_fmt(format_args!("\n\t\t\t\tFake Player: {}", entry_data.fake_player));
+                    file.write_fmt(format_args!("\n\t\t\t\tIs HLTV: {}", entry_data.is_hltv));
+                    file.write_fmt(format_args!("\n\t\t\t\tCustom File CRCs: {}, {}, {}, {}",
+                                entry_data.custom_files[0], entry_data.custom_files[1], entry_data.custom_files[2], entry_data.custom_files[3]));
+                    file.write_fmt(format_args!("\n\t\t\t\tFiles Downloaded: {}", entry_data.files_downloaded));
+                } else if table.name == "server_query_info" {
+                    let entry_data: QueryPort = entry.entry_data.into();
+                    file.write_fmt(format_args!("\n\t\t\tEntry Name: {}", entry.name));
+                    file.write_fmt(format_args!("\n\t\t\t\tPort: {}", entry_data.port));
+                } else if table.name == "lightstyles" {
+                    let entry_data: LightStyle = entry.entry_data.into();
+                    file.write_fmt(format_args!("\n\t\t\tEntry Name: {}", entry.name));
+                    file.write_fmt(format_args!("\n\t\t\t\t{} frames: [", entry_data.values.len()));
+                    let mut frame_str: String = "".to_string();
+                    for frame in entry_data.values {
+                        frame_str.push_str(&frame.to_string());
+                        frame_str.push_str(", ");
+                    }
+                    file.write_fmt(format_args!("{}]", frame_str[..frame_str.len()-2].to_string()));
+                } else {
+                    file.write_fmt(format_args!("\n\t\t\t{}", entry.name));
+                }
+            } else {
+                file.write_fmt(format_args!("\n\t\t\t{}", entry.name));
+            }
+        }
+        file.write_fmt(format_args!("\n\t\t{} table classes", table.class_count));
+        for class in table.classes {
+            file.write_fmt(format_args!("\n\t\t\tName: {}", class.name));
+            file.write_fmt(format_args!("\n\t\t\t\tData: {}", class.data));
+        }
+    }
+    file.write_all("\n".as_bytes());
 }
