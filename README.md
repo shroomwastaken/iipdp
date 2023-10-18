@@ -49,3 +49,5 @@ Everything else:
     * Added PortalFXSurface user message parsing
     * Added support for parsing directories of demos
     * Made time formatting nicer
+- v0.2.5:
+    * Added Stringtables packet parsing and dumping
