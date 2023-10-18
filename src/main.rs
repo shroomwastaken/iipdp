@@ -4,6 +4,7 @@ use std::io;
 use std::path::Path;
 use std::process::exit;
 use std::time::Instant;
+use std::ffi::OsStr;
 
 use structs::demo::Demo;
 use structs::demo_header::DemoHeader;
@@ -23,12 +24,8 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     if args.len() == 1 {
-        println!("IIPDP v0.2.4 made by shroom\nUsage: iipdp <demo file> [-dump]");
+        println!("IIPDP v0.2.5 made by shroom\nUsage: iipdp <demo file> [-dump]");
         println!("-dump will output all of the available demo file information into a text file in the working directory");
-        io::stdin().read_line(&mut String::new()).unwrap();
-        return;
-    } else if args.len() == 3 && args[2] != "-dump" {
-        println!("IIPDP v0.2.4 made by shroom\nInvalid arguments!");
         io::stdin().read_line(&mut String::new()).unwrap();
         return;
     }
@@ -37,40 +34,46 @@ fn main() {
     let dumping: bool = args.len() == 3 && args[2] == "-dump";
 
     if path.is_file() {
-        let mut main_reader: BitReader = BitReader { contents: fs::read(&args[1]).unwrap_or_else(|err| {
-            println!(r#"Demo file reading failed because of: {} ¯\_(ツ)_/¯"#, err);
-            io::stdin().read_line(&mut String::new()).unwrap();
-            exit(1);
-        }), cur_bit_index: 0 };
-    
-        println!("Parsing...\n");
-        let start_time = Instant::now();
-    
-        let mut header: DemoHeader = DemoHeader::new();
-        header.parse(&mut main_reader);    
-    
-        let mut demo = Demo::new();
-    
-        demo.header = header;
-    
-        demo.data_manager.get_info_from_header(&demo.header);
-    
-        let packets: Vec<Packet> = parser::get_packets(&mut main_reader, &mut demo);
-    
-        demo.packets = packets;
-    
-        if demo.header.demo_file_stamp != "HL2DEMO" {
-            println!("Invalid demo file");
+        if path.extension().unwrap_or_else(|| {OsStr::new("nope")}) == "dem" {
+            let mut main_reader: BitReader = BitReader { contents: fs::read(&args[1]).unwrap_or_else(|err| {
+                println!(r#"Demo file reading failed because of: {} ¯\_(ツ)_/¯"#, err);
+                io::stdin().read_line(&mut String::new()).unwrap();
+                exit(1);
+            }), cur_bit_index: 0 };
+        
+            println!("Parsing...\n");
+            let start_time = Instant::now();
+        
+            let mut header: DemoHeader = DemoHeader::new();
+            header.parse(&mut main_reader);    
+        
+            let mut demo = Demo::new();
+        
+            demo.header = header;
+        
+            demo.data_manager.get_info_from_header(&demo.header);
+        
+            let packets: Vec<Packet> = parser::get_packets(&mut main_reader, &mut demo);
+        
+            demo.packets = packets;
+        
+            if demo.header.demo_file_stamp != "HL2DEMO" {
+                println!("Invalid demo file");
+                io::stdin().read_line(&mut String::new()).unwrap();
+                return;
+            }
+        
+            if !dumping {
+                info_processor::print_header_info(demo);
+                println!("\nParsed in {:?}", Instant::now().duration_since(start_time));
+            } else {
+                info_processor::dump_file(&args[1], demo);
+                println!("\nDumped in {:?}", Instant::now().duration_since(start_time));
+            }
+        } else {
+            println!("Invalid file!");
             io::stdin().read_line(&mut String::new()).unwrap();
             return;
-        }
-    
-        if !dumping {
-            info_processor::print_header_info(demo);
-            println!("\nParsed in {:?}", Instant::now().duration_since(start_time));
-        } else {
-            info_processor::dump_file(&args[1], demo);
-            println!("\nDumped in {:?}", Instant::now().duration_since(start_time));
         }
     } else if path.is_dir() {
         let start_time = Instant::now();
@@ -79,7 +82,7 @@ fn main() {
         let mut total_time: f32 = 0.0;
         for f in files {
             let file = f.unwrap();
-            if file.path().extension().unwrap() == "dem" {
+            if file.path().extension().unwrap_or_else(|| {OsStr::new("nope")}) == "dem" {
                 println!("\n\nFile Name: {:?}", file.file_name());
                 
                 let mut main_reader: BitReader = BitReader { contents: fs::read(file.path()).unwrap_or_else(|err| {
