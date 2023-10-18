@@ -157,7 +157,7 @@ impl CloseCaption {
         Self {
             token_name: reader.read_ascii_string_nulled(),
             duration: reader.read_int(16) as f32 * 0.1,
-            flags: CloseCaptionFlags::from_i32(reader.read_int(8)).unwrap(),
+            flags: CloseCaptionFlags::from_bits_truncate(reader.read_int(8)),
         }
     }
 }
@@ -686,18 +686,16 @@ impl SpHapWeaponEvent {
 
 // enums (various flags and types)
 
-enum_from_primitive! {
-    #[derive(Debug, PartialEq)]
-    pub enum CloseCaptionFlags {
-        None, 
-        WarnIfMissing,
-        FromPlayer,
-        GenderMale,
-        GenderFemale,
-    }
-}
-
 bitflags! {
+    #[derive(Debug, PartialEq)]
+    pub struct CloseCaptionFlags: i32 {
+        const None = 0; 
+        const WarnIfMissing = 1;
+        const FromPlayer = 2;
+        const GenderMale = 3;
+        const GenderFemale = 4;
+    }
+
     #[derive(Debug, PartialEq)]
     pub struct DamageType : i32 {
         const None = -1;
