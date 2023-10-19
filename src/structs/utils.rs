@@ -4,7 +4,7 @@ use crate::bitreader::BitReader;
 
 // used a bunch in usermessages
 // ill need to use this at some point so ill just implement it now
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct EHandle {
     pub val: i32,
 }
@@ -26,6 +26,7 @@ impl fmt::Display for EHandle {
 }
 
 // for NetSetConVar net/svc message
+#[derive(Clone)]
 pub struct ConVar {
     pub convar_name: String,
     pub convar_value: String,
@@ -38,6 +39,7 @@ impl ConVar {
 }
 
 // for SvcClassInfo
+#[derive(Clone)]
 pub struct ServerClass {
     pub class_id: i32,
     pub class_name: String,
@@ -51,6 +53,7 @@ impl ServerClass {
 }
 
 // placeholders for now
+#[derive(Clone)]
 pub struct StringTable;
 
 impl StringTable {
@@ -59,6 +62,7 @@ impl StringTable {
     }
 }
 
+#[derive(Clone)]
 pub struct VoiceData;
 
 impl VoiceData {
@@ -67,8 +71,10 @@ impl VoiceData {
     }
 }
 
+#[derive(Clone)]
 pub struct SoundInfo;
 
+#[derive(Clone)]
 pub struct SplitScreenData;
 
 impl SplitScreenData {
@@ -77,6 +83,7 @@ impl SplitScreenData {
     }
 }
 
+#[derive(Clone)]
 pub struct EntityMessageData;
 
 impl EntityMessageData {
@@ -85,6 +92,7 @@ impl EntityMessageData {
     }
 }
 
+#[derive(Clone)]
 pub struct PacketEntitiesData;
 
 impl PacketEntitiesData {
@@ -93,6 +101,7 @@ impl PacketEntitiesData {
     }
 }
 
+#[derive(Clone)]
 pub struct TempEntitiesData;
 
 impl TempEntitiesData {
@@ -101,6 +110,7 @@ impl TempEntitiesData {
     }
 }
 
+#[derive(Clone)]
 pub struct MenuData;
 
 impl MenuData {
@@ -109,6 +119,7 @@ impl MenuData {
     }
 }
 
+#[derive(Clone)]
 pub struct CmdKeyValuesData;
 
 impl CmdKeyValuesData {
@@ -117,6 +128,7 @@ impl CmdKeyValuesData {
     }
 }
 
+#[derive(Clone)]
 pub struct PaintmapData;
 
 impl PaintmapData {
@@ -207,7 +219,7 @@ impl GameEventList {
 }
 
 // implementation from https://github.com/lopossumi/Rust-Vectors
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct Vec3 {
     pub x: f32,
     pub y: f32,

@@ -48,7 +48,7 @@ pub enum UserMessageType {
 }
 
 // all of the currently parseable types
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum UserMessageDataType {
     Unknown,
     AchievementEvent(AchievementEvent), Battery(Battery),
@@ -64,6 +64,7 @@ pub enum UserMessageDataType {
     HapSetDrag(HapSetDrag), SpHapWeaponEvent(SpHapWeaponEvent),
 }
 
+#[derive(Clone)]
 pub struct UserMessage {
     pub msg_type: UserMessageType,
     pub data: UserMessageDataType,
@@ -123,7 +124,7 @@ impl UserMessage {
 }
 
 // all of the structs and parsing
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct AchievementEvent {
     achievement_id: i32,
 }
@@ -134,7 +135,7 @@ impl AchievementEvent {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct Battery {
     battery_val: i32,
 }
@@ -145,7 +146,7 @@ impl Battery {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct CloseCaption {
     token_name: String,
     duration: f32,
@@ -162,7 +163,7 @@ impl CloseCaption {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct Damage {
     armor: i32,
     damage_taken: i32,
@@ -181,7 +182,7 @@ impl Damage {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct EntityPortalled {
     portal: EHandle,
     portalled: EHandle,
@@ -200,7 +201,7 @@ impl EntityPortalled {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct Fade {
     duration: f32,
     hold_time: i32,
@@ -225,7 +226,7 @@ impl Fade {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct Geiger {
     geiger_range: i32,
 }
@@ -237,7 +238,7 @@ impl Geiger {
 }
 
 // this is a chonker
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct HudMsgInfo {
     x: f32, y: f32,
     r1: i32, g1: i32, b1: i32, a1: i32,  
@@ -261,7 +262,7 @@ impl HudMsgInfo {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct HudMsg {
     channel: HudChannel,
     msg_info: Option<HudMsgInfo>,
@@ -279,7 +280,7 @@ impl HudMsg {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct HudText {
     string: String,
 }
@@ -290,7 +291,7 @@ impl HudText {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct KeyHintText {
     count: i32, // should always be 1
     key_string: String,
@@ -302,7 +303,7 @@ impl KeyHintText {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct KillCam {
     spec_mode: SpectatorMode,
     target1: i32,
@@ -321,7 +322,7 @@ impl KillCam {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct LogoTimeMsg {
     time: f32,
 }
@@ -332,7 +333,7 @@ impl LogoTimeMsg {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct MpMapCompleted {
     branch: i32,
     level: i32,
@@ -346,7 +347,7 @@ impl MpMapCompleted {
 
 pub struct MpMapCompletedData; // p2 specific so im not gonna bother yet
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct MpTauntEarned {
     taunt_name: String,
     award_silently: bool,
@@ -358,7 +359,7 @@ impl MpTauntEarned {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct MpTauntLocked {
     taunt_name: String,
 }
@@ -369,7 +370,7 @@ impl MpTauntLocked {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct PaintEntity {
     ent: EHandle,
     paint_type: PaintType,
@@ -386,7 +387,7 @@ impl PaintEntity {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct PaintWorld {
     paint_type: PaintType,
     ehandle: EHandle,
@@ -422,7 +423,7 @@ impl PaintWorld {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct PortalFXSurface {
     portal_ent: i32,
     owner_ent: i32,
@@ -447,7 +448,7 @@ impl PortalFXSurface {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct ResetHUD {
     unknown: i32,
 }
@@ -458,7 +459,7 @@ impl ResetHUD {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct Rumble {
     rumble_type: RumbleLookup,
     scale: f32,
@@ -475,7 +476,7 @@ impl Rumble {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct SayText {
     client_id: i32,
     text: String,
@@ -492,7 +493,7 @@ impl SayText {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct SayText2 {
     client: i32,
     wants_to_chat: bool,
@@ -515,7 +516,7 @@ impl SayText2 {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct ScoreboardTempUpdate {
     num_portals: i32,
     time_taken: i32, // centi-seconds
@@ -527,7 +528,7 @@ impl ScoreboardTempUpdate {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct Shake {
     command: ShakeCommand,
     amplitude: f32,
@@ -546,7 +547,7 @@ impl Shake {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct TextMsg {
     destination: TextMsgDestination,
     messages: Vec<String>,
@@ -565,7 +566,7 @@ impl TextMsg {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct Train {
     pos: i32,
 }
@@ -576,7 +577,7 @@ impl Train {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct TransitionFade {
     seconds: f32,
 }
@@ -587,7 +588,7 @@ impl TransitionFade {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct VguiMenu {
     message: String,
     show: bool,
@@ -614,13 +615,13 @@ impl VguiMenu {
 
 
 // for VoiceMask user message
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct PlayerMask {
     pub game_rules_mask: i32,
     pub ban_mask: i32,
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct VoiceMask {
     voice_max_players: i32,
     player_masks: Vec<PlayerMask>,
@@ -640,7 +641,7 @@ impl VoiceMask {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct HapPunch {
     f1: f32, f2: f32, f3: f32,
 }
@@ -651,7 +652,7 @@ impl HapPunch {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct HapSetConstForce {
     s1: i32, s2: i32, s3: i32,
 }
@@ -662,7 +663,7 @@ impl HapSetConstForce {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct HapSetDrag {
     unknown: f32,
 }
@@ -673,7 +674,7 @@ impl HapSetDrag {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct SpHapWeaponEvent {
     unk: i32,
 }
@@ -687,7 +688,7 @@ impl SpHapWeaponEvent {
 // enums (various flags and types)
 
 bitflags! {
-    #[derive(Debug, PartialEq)]
+    #[derive(Debug, PartialEq, Clone)]
     pub struct CloseCaptionFlags: i32 {
         const None = 0; 
         const WarnIfMissing = 1;
@@ -696,7 +697,7 @@ bitflags! {
         const GenderFemale = 4;
     }
 
-    #[derive(Debug, PartialEq)]
+    #[derive(Debug, PartialEq, Clone)]
     pub struct DamageType : i32 {
         const None = -1;
         const DmgGeneric             = 0;
@@ -732,7 +733,7 @@ bitflags! {
         const DmgBuckshot            = 1 << 29;
     }
 
-    #[derive(Debug, PartialEq)]
+    #[derive(Debug, PartialEq, Clone)]
     pub struct FadeFlags: i32 {
         const None = 0;
         const FadeIn = 1;
@@ -742,7 +743,7 @@ bitflags! {
         const Purge = 1 << 4;
     }
 
-    #[derive(Debug, PartialEq)]
+    #[derive(Debug, PartialEq, Clone)]
     pub struct RumbleFlags : i32 {
 		const None            = 0;
 		const Stop            = 1;
@@ -756,7 +757,7 @@ bitflags! {
 }
 
 enum_from_primitive! {
-    #[derive(Debug, PartialEq)]
+    #[derive(Debug, PartialEq, Clone)]
     pub enum HudMsgEffect {
         Fade = 0,
         Flicker = 1,
@@ -765,7 +766,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
     pub enum HudChannel {
         NetMessage1 = 0,
         NetMessage2,
@@ -777,7 +778,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    #[derive(Debug, PartialEq)]
+    #[derive(Debug, PartialEq, Clone)]
     pub enum SpectatorMode {
         None,      // not in spectator mode
         DeathCam,  // special mode for death cam animation
@@ -790,7 +791,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    #[derive(Debug, PartialEq)]
+    #[derive(Debug, PartialEq, Clone)]
     pub enum PortalFizzleType {
         PortalFizzleSuccess = 0, // Placed fine (no fizzle)
         PortalFizzleCantFit,
@@ -807,7 +808,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    #[derive(Debug, PartialEq)]
+    #[derive(Debug, PartialEq, Clone)]
     pub enum PaintType {
         JumpPaint,
         SpeedPaintOther,
@@ -818,7 +819,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    #[derive(Debug, PartialEq)]
+    #[derive(Debug, PartialEq, Clone)]
     #[allow(non_camel_case_types)]
     pub enum RumbleLookup {
         RumbleInvalid = -1,
@@ -846,7 +847,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    #[derive(Debug, PartialEq)]
+    #[derive(Debug, PartialEq, Clone)]
     pub enum ShakeCommand {
         Start = 0,  // Starts the screen shake for all players within the radius.
         Stop,       // Stops the screen shake for all players within the radius.
@@ -858,7 +859,7 @@ enum_from_primitive! {
 }
 
 enum_from_primitive! {
-    #[derive(Debug, PartialEq)]
+    #[derive(Debug, PartialEq, Clone)]
     pub enum TextMsgDestination {
 		PrintNotify = 1,
 		PrintConsole,

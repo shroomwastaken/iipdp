@@ -5,8 +5,10 @@ use crate::structs::data_manager::DataManager;
 use crate::structs::{user_message::{UserMessageType, UserMessage}, data_manager::Game};
 
 // contains no data
+#[derive(Clone)]
 pub struct NetNop;
 
+#[derive(Clone)]
 pub struct NetDisconnect {
     pub text: String,
 }
@@ -17,6 +19,7 @@ impl NetDisconnect {
     }
 }
 
+#[derive(Clone)]
 pub struct NetFile {
     pub transfer_id: i32,
     pub filename: String,
@@ -33,6 +36,7 @@ impl NetFile {
     }
 }
 
+#[derive(Clone)]
 pub struct NetSplitScreenUser {
     pub unknown: bool,
 }
@@ -45,6 +49,7 @@ impl NetSplitScreenUser {
     }
 }
 
+#[derive(Clone)]
 pub struct NetTick {
     pub tick: i32,
     pub host_frame_time: i32,
@@ -61,6 +66,7 @@ impl NetTick {
     }
 }
 
+#[derive(Clone)]
 pub struct NetStringCmd {
     pub command: String,
 }
@@ -71,6 +77,7 @@ impl NetStringCmd {
     }
 }
 
+#[derive(Clone)]
 pub struct NetSetConVar {
     pub length: i32,
     pub convars: Vec<utils::ConVar>,
@@ -98,6 +105,7 @@ impl NetSetConVar {
     }
 }
 
+#[derive(Clone)]
 pub struct NetSignonState {
     pub signon_state: i32,
     pub spawn_count: i32,
@@ -113,6 +121,7 @@ impl NetSignonState {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcServerInfo {
     pub protocol: i32,
     pub server_count: i32,
@@ -169,6 +178,7 @@ impl SvcServerInfo {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcSendTable {
     pub needs_decoder: bool,
     pub length: i32,
@@ -187,6 +197,7 @@ impl SvcSendTable {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcClassInfo {
     pub length: i32,
     pub create_on_client: bool,
@@ -220,6 +231,7 @@ impl SvcClassInfo {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcSetPause {
     pub paused: bool,
 }
@@ -230,6 +242,7 @@ impl SvcSetPause {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcCreateStringTable {
     pub name: String,
     pub max_entries: i32,
@@ -281,6 +294,7 @@ impl SvcCreateStringTable {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcUpdateStringTable {
     pub table_id: i32,
     pub num_changed_entries: i32,
@@ -305,6 +319,7 @@ impl SvcUpdateStringTable {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcVoiceInit {
     pub codec: String,
     pub quality: i32,
@@ -326,6 +341,7 @@ impl SvcVoiceInit {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcVoiceData {
     pub client: i32,
     pub proximity: i32,
@@ -359,6 +375,7 @@ impl SvcVoiceData {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcPrint {
     pub message: String,
 }
@@ -369,6 +386,7 @@ impl SvcPrint {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcSounds {
     pub reliable_sound: bool,
     pub num_sounds: i32,
@@ -398,6 +416,7 @@ impl SvcSounds {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcSetView {
     pub entity_index: i32,
 }
@@ -408,6 +427,7 @@ impl SvcSetView {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcFixAngle {
     pub relative: bool,
     pub angle: Vec<f32>,
@@ -427,6 +447,7 @@ impl SvcFixAngle {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcCrosshairAngle {
     pub angle: Vec<f32>,
 }
@@ -443,6 +464,7 @@ impl SvcCrosshairAngle {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcBspDecal {
     pub pos: Vec<Option<f32>>,
     pub decal_texture_index: i32,
@@ -469,6 +491,7 @@ impl SvcBspDecal {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcSplitScreen {
     pub s_type: i32,
     pub length: i32,
@@ -487,6 +510,7 @@ impl SvcSplitScreen {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcUserMessage {
     pub length: i32,
     pub data: UserMessage,
@@ -505,6 +529,7 @@ impl SvcUserMessage {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcEntityMessage {
     pub entity_index: i32,
     pub class_id: i32,
@@ -525,6 +550,7 @@ impl SvcEntityMessage {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcGameEvent {
     pub length: i32,
     pub data: utils::GameEvent,
@@ -560,6 +586,7 @@ impl SvcGameEvent {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcPacketEntities {
     pub max_entries: i32,
     pub is_delta: bool,
@@ -599,6 +626,7 @@ impl SvcPacketEntities {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcTempEntities {
     pub num_entries: i32,
     pub length: i32,
@@ -615,6 +643,7 @@ impl SvcTempEntities {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcPrefetch {
     pub sound_index: i32,
 }
@@ -632,6 +661,7 @@ impl SvcPrefetch {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcMenu {
     pub menu_type: i32,
     pub length: i32,
@@ -647,6 +677,7 @@ impl SvcMenu {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcGameEventList {
     pub events: i32,
     pub length: i32,
@@ -670,6 +701,7 @@ impl SvcGameEventList {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcGetCvarValue {
     pub cookie: String,
     pub cvar_name: String,
@@ -684,6 +716,7 @@ impl SvcGetCvarValue {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcCmdKeyValues {
     pub length: i32,
     pub data: utils::CmdKeyValuesData,
@@ -699,6 +732,7 @@ impl SvcCmdKeyValues {
     }
 }
 
+#[derive(Clone)]
 pub struct SvcPaintmapData {
     pub length: i32,
     pub data: utils::PaintmapData

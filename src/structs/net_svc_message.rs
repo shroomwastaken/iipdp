@@ -16,6 +16,7 @@ use crate::structs::utils::GameEventList;
 use crate::structs::data_manager::DataManager;
 use crate::structs::user_message::write_usermsg_data_to_file;
 
+#[derive(Clone)]
 pub enum NetSvcMessageDataTypes {
     Unknown,
     NetNop(NetNop),
@@ -351,6 +352,7 @@ impl Into<SvcVoiceInit> for NetSvcMessageDataTypes {
     }
 }
 
+#[derive(PartialEq)]
 pub enum NetSvcMessageTypes {
     Unknown,
     NetNop,
