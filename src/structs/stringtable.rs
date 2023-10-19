@@ -289,14 +289,14 @@ pub fn write_stringtables_data_to_file(file: &mut File, data: StringTables) {
                     file.write_fmt(format_args!("\n\t\t\t\tPort: {}", entry_data.port));
                 } else if table.name == "lightstyles" {
                     let entry_data: LightStyle = entry.entry_data.into();
-                    file.write_fmt(format_args!("\n\t\t\tEntry Name: {}", entry.name));
-                    file.write_fmt(format_args!("\n\t\t\t\t{} frames: [", entry_data.values.len()));
+                    file.write_fmt(format_args!("\n\t\t\t{}: ", entry.name));
+                    file.write_fmt(format_args!("{} frames: [", entry_data.values.len()));
                     let mut frame_str: String = "".to_string();
                     for frame in entry_data.values {
                         frame_str.push_str(&frame.to_string());
                         frame_str.push_str(", ");
                     }
-                    file.write_fmt(format_args!("{}]", frame_str[..frame_str.len()-2].to_string()));
+                    file.write_fmt(format_args!("{}]", if frame_str != "" { frame_str[..frame_str.len()-2].to_string() } else { "".to_string() }));
                 } else {
                     file.write_fmt(format_args!("\n\t\t\t{}", entry.name));
                 }
