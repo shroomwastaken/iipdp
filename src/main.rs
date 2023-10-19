@@ -25,7 +25,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     if args.len() == 1 {
-        println!("IIPDP v0.2.5 made by shroom\nUsage: iipdp <demo file> [-dump]");
+        println!("IIPDP v0.2.6 made by shroom\nUsage: iipdp <demo file> [-dump]");
         println!("-dump will output all of the available demo file information into a text file in the working directory");
         io::stdin().read_line(&mut String::new()).unwrap();
         return;
