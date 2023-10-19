@@ -21,6 +21,8 @@ pub struct DataManager {
     pub user_message_list: Vec<UserMessageType>,
     pub game: Game,
     pub net_svc_type_bits: i32,
+    pub adj_start_tick: i32,
+    pub adj_end_tick: i32,
 }
 
 impl DataManager {
@@ -33,6 +35,8 @@ impl DataManager {
             user_message_list: Vec::new(),
             game: Game::UNKNOWN,
             net_svc_type_bits: 6, // default for everything other than 3420 iirc
+            adj_start_tick: 0,
+            adj_end_tick: 0,
         }
     }
 
@@ -167,7 +171,17 @@ impl DataManager {
         };
     }
 
-    pub fn get_ticks_and_time(&self) -> (i32, f32) {
-        return (self.last_packet_tick, ((self.last_packet_tick as f32) + 1f32) * 0.015)
+    pub fn get_measured_ticks_and_time(&self) -> (i32, f32) {
+        return (self.last_packet_tick + 1, ((self.last_packet_tick as f32) + 1f32) * 0.015)
+    }
+
+    pub fn get_adjusted_ticks_and_time(&self) -> (i32, f32) {
+        if self.adj_end_tick == 0 && self.adj_start_tick != 0 {
+            return (self.last_packet_tick - self.adj_start_tick + 1, ((self.last_packet_tick - self.adj_start_tick + 1) as f32 * 0.015));
+        } else if self.adj_end_tick != 0 && self.adj_start_tick == 0 {
+            return (self.adj_end_tick + 1, ((self.adj_end_tick + 1) as f32 * 0.015));
+        } else {
+            return self.get_measured_ticks_and_time();
+        }
     }
 }

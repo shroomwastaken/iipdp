@@ -1,7 +1,8 @@
+use crate::adjust_time::{try_adjust_for_wakeup, try_adjust_for_glados_death};
 use crate::structs::cmd_info::CmdInfo;
 use crate::structs::data_manager::DataManager;
 use crate::structs::demo::Demo;
-use crate::structs::net_svc_message::parse;
+use crate::structs::net_svc_message::{parse, NetSvcMessageTypes};
 use crate::structs::packet::{Packet, PacketDataType, PacketType};
 use crate::bitreader::BitReader;
 use crate::structs::packet_data_types::{PP, ConsoleCmd, UserCmd, SyncTick, StringTables, DataTables, Stop};
@@ -30,11 +31,11 @@ pub fn get_packets(reader: &mut BitReader, demo: &mut Demo) -> Vec<Packet> {
                 demo.data_manager.last_packet_tick = cur_packet.tick;
             }
 
-            cur_packet.data = read_packet_data(reader, cur_packet.packet_type, &mut demo.data_manager);
+            cur_packet.data = read_packet_data(reader, cur_packet.packet_type, &mut demo.data_manager, cur_packet.tick);
         } else {
             cur_packet.tick = reader.read_int(24); // last int is 3 bytes for whatever reason
 
-            cur_packet.data = read_packet_data(reader, cur_packet.packet_type, &mut demo.data_manager);
+            cur_packet.data = read_packet_data(reader, cur_packet.packet_type, &mut demo.data_manager, cur_packet.tick);
 
             packets.push(cur_packet);
 
@@ -47,7 +48,7 @@ pub fn get_packets(reader: &mut BitReader, demo: &mut Demo) -> Vec<Packet> {
 
 // takes file bytes (contents), start index (start), message type (msg_type);
 // returns packet data wrapped in PacketDataType enum;
-fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_mgr: &mut DataManager) -> PacketDataType {
+fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_mgr: &mut DataManager, cur_tick: i32) -> PacketDataType {
     let packet_data: PacketDataType;
 
     match packet_type {
@@ -62,6 +63,10 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
 
             data.messages = parse(&mut reader.split_and_skip(data.size as i32 * 8), demo_data_mgr, data.size);
 
+            if data.messages.iter().find(|m| {m.msg_type == NetSvcMessageTypes::SvcFixAngle}).is_some() && cur_tick != 0 {
+                try_adjust_for_wakeup(&data.messages, cur_tick, demo_data_mgr,);
+            }
+
             packet_data = PacketDataType::Packet(data);
         },
         PacketType::ConsoleCmd => {
@@ -69,6 +74,8 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
 
             data.size = reader.read_int(32);
             data.data = reader.read_ascii_string((data.size * 8) as i32);
+
+            try_adjust_for_glados_death(&data.data, cur_tick, demo_data_mgr);
             
             packet_data = PacketDataType::ConsoleCmd(data);
         },

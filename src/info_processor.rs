@@ -25,17 +25,31 @@ pub fn print_header_info(demo: Demo) {
 
     print!("\n");
 
-    let ticks_and_time = demo.data_manager.get_ticks_and_time();
+    let measured_ticks_and_time = demo.data_manager.get_measured_ticks_and_time();
+    let adjusted_ticks_and_time = demo.data_manager.get_adjusted_ticks_and_time();
 
-    println!("Measured Ticks: {}",  (ticks_and_time.0 + 1));
+    println!("Measured Ticks: {}",  (measured_ticks_and_time.0));
 
-    if ticks_and_time.1 < 60f32 {
-        println!("Measured Time: {}", format!("{:.3}", ticks_and_time.1));
+    if measured_ticks_and_time.1 < 60f32 {
+        println!("Measured Time: {}", format!("{:.3}", measured_ticks_and_time.1));
     } else {
-        let minutes = (ticks_and_time.1 / 60f32).floor();
-        let seconds = (ticks_and_time.1 - (60f32 * minutes)).floor();
-        let millis = (ticks_and_time.1 - (60f32 * minutes)).fract();
+        let minutes = (measured_ticks_and_time.1 / 60f32).floor();
+        let seconds = (measured_ticks_and_time.1 - (60f32 * minutes)).floor();
+        let millis = (measured_ticks_and_time.1 - (60f32 * minutes)).fract();
         println!("Measured Time: {}", format!("{}:{:02}.{:.0}", minutes, seconds, millis * 1000.0));
+    }
+
+    if measured_ticks_and_time != adjusted_ticks_and_time {
+        println!("\nAdjusted Ticks: {}",  (adjusted_ticks_and_time.0));
+
+        if adjusted_ticks_and_time.1 < 60f32 {
+            println!("Adjusted Time: {}", format!("{:.3}", adjusted_ticks_and_time.1));
+        } else {
+            let minutes = (adjusted_ticks_and_time.1 / 60f32).floor();
+            let seconds = (adjusted_ticks_and_time.1 - (60f32 * minutes)).floor();
+            let millis = (adjusted_ticks_and_time.1 - (60f32 * minutes)).fract();
+            println!("Adjusted Time: {}", format!("{}:{:02}.{:.0}", minutes, seconds, millis * 1000.0));
+        }
     }
 }
 

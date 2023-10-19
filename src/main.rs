@@ -19,6 +19,7 @@ mod structs;
 mod bitreader;
 mod info_processor;
 mod parser;
+mod adjust_time;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -78,8 +79,13 @@ fn main() {
     } else if path.is_dir() {
         let start_time = Instant::now();
         let files = fs::read_dir(path).unwrap();
-        let mut total_ticks: i32 = 0;
-        let mut total_time: f32 = 0.0;
+
+        let mut total_measured_ticks: i32 = 0;
+        let mut total_measured_time: f32 = 0.0;
+        
+        let mut total_adjusted_ticks: i32 = 0;
+        let mut total_adjusted_time: f32 = 0.0;
+
         for f in files {
             let file = f.unwrap();
             if file.path().extension().unwrap_or_else(|| {OsStr::new("nope")}) == "dem" {
@@ -113,8 +119,11 @@ fn main() {
                     return;
                 }
             
-                total_ticks += demo.data_manager.get_ticks_and_time().0;
-                total_time += demo.data_manager.get_ticks_and_time().1;
+                total_measured_ticks += demo.data_manager.get_measured_ticks_and_time().0;
+                total_measured_time += demo.data_manager.get_measured_ticks_and_time().1;
+
+                total_adjusted_ticks += demo.data_manager.get_adjusted_ticks_and_time().0;
+                total_adjusted_time += demo.data_manager.get_adjusted_ticks_and_time().1;
 
                 if !dumping {
                     info_processor::print_header_info(demo);
@@ -126,13 +135,24 @@ fn main() {
             }
         }
 
-        println!("\n\nTotal Measured Ticks: {}", total_ticks);
+        println!("\n\nTotal Measured Ticks: {}", total_measured_ticks);
 
-        let minutes = (total_time / 60f32).floor();
-        let seconds = (total_time - (60f32 * minutes)).floor();
-        let millis = (total_time - (60f32 * minutes)).fract();
+        let mut minutes = (total_measured_time / 60f32).floor();
+        let mut seconds = (total_measured_time - (60f32 * minutes)).floor();
+        let mut millis = (total_measured_time - (60f32 * minutes)).fract();
 
         println!("Total Measured Time: {}:{:02}.{:.0}", minutes, seconds, millis * 1000.0);
+
+        if total_adjusted_ticks != total_measured_ticks {
+            println!("\nTotal Adjusted Ticks: {}", total_adjusted_ticks);
+
+            minutes = (total_adjusted_time / 60f32).floor();
+            seconds = (total_adjusted_time - (60f32 * minutes)).floor();
+            millis = (total_adjusted_time - (60f32 * minutes)).fract();
+
+            println!("Total Adjusted Time: {}:{:02}.{:.0}", minutes, seconds, millis * 1000.0);
+        }
+            
 
         println!("\nParsed all files in: {:?}", Instant::now().duration_since(start_time));
     }
