@@ -668,7 +668,7 @@ pub fn write_msg_data_to_file(file: &mut File, messages: Vec<NetSvcMessage>, dat
                 let msg_data: nt::SvcFixAngle = message.data.into();
                 file.write_all("\n\tMessage: SvcFixAngle".as_bytes());
                 file.write_fmt(format_args!("\n\t\tRelative: {}", msg_data.relative));
-                file.write_fmt(format_args!("\n\t\tAngle: {} {} {}", msg_data.angle[0], msg_data.angle[1], msg_data.angle[2]));
+                file.write_fmt(format_args!("\n\t\tAngle: {:.3} {:.3} {:.3}", msg_data.angle[0], msg_data.angle[1], msg_data.angle[2]));
             },
             nsmt::SvcCrosshairAngle => {
                 let msg_data: nt::SvcCrosshairAngle = message.data.into();

@@ -420,7 +420,7 @@ impl SvcFixAngle {
         let mut angle_vec: Vec<f32> = Vec::new();
 
         for _ in 0..3 {
-            angle_vec.push(reader.read_float(16));
+            angle_vec.push(reader.read_int(16) as f32 * (360f32 / (1 << 16) as f32));
         }
 
         Self { relative: relative, angle: angle_vec }
