@@ -51,3 +51,5 @@ Everything else:
     * Made time formatting nicer
 - v0.2.5:
     * Added Stringtables packet parsing and dumping
+- v0.2.6:
+    * Added time adjustment, now this parser can actually time runs properly
