@@ -3,7 +3,7 @@ use core::fmt;
 use crate::bitreader::BitReader;
 
 // used a bunch in usermessages
-// ill need to use this at some point so ill just implement it now
+// dont know what these really are
 #[derive(PartialEq, Clone)]
 pub struct EHandle {
     pub val: i32,
@@ -26,6 +26,7 @@ impl fmt::Display for EHandle {
 }
 
 // for NetSetConVar net/svc message
+// this doesnt need to be a struct but i like it being a struct
 #[derive(Clone)]
 pub struct ConVar {
     pub convar_name: String,
@@ -138,6 +139,19 @@ impl PaintmapData {
 }
 
 // GameEvent stuff
+/*
+first big thing i implemented for this parser
+
+when you get SvcGameEvent list net/svc message, you save a list of all possible game events 
+and what values each of them are supposed to store (by parsing GameEventDescriptors)
+
+later when you get an SvcGameEvent message you look at that list and get the game event at the specified ID
+
+you then look at the values that game event is supposed to have ("keys" field in GameEventDescriptor)
+
+and parse the specified values, populating the "keys" field of the GameEvent struct
+*/
+
 #[derive(Clone)]
 pub enum GameEventKeyTypes {
     None,
@@ -218,7 +232,9 @@ impl GameEventList {
     }
 }
 
-// implementation from https://github.com/lopossumi/Rust-Vectors
+// new and add_vec3 from https://github.com/lopossumi/Rust-Vectors
+// everything else from me
+// basically just a vector3 of floats which you can add with other vectors
 #[derive(PartialEq, Clone)]
 pub struct Vec3 {
     pub x: f32,

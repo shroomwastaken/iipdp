@@ -8,6 +8,9 @@ use crate::enum_primitive::enum_from_primitive;
 use crate::enum_primitive::FromPrimitive;
 use crate::bitflags::bitflags;
 
+// these are for the SvcUserMessage net/svc message
+// theyre used to store various data, kind of functioning like a smaller Packet packet
+
 // used in data_manager.rs
 // this is all the possible usermessage types (except l4d and l4d2) which i borrowed from untitledparser
 // only like 20% of these are actually implemented but ill have them all here cause why not
@@ -868,7 +871,7 @@ enum_from_primitive! {
 	}
 }
 
-// implementing Into<type> for every type in the UserMessageDataType enum (needed for printing)
+// implementing Into<type> for every type in the UserMessageDataType enum (needed for dumping)
 
 impl Into<AchievementEvent> for UserMessageDataType {
     fn into(self) -> AchievementEvent {

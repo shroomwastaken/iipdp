@@ -2,6 +2,8 @@ use crate::structs::demo_header::DemoHeader;
 use crate::structs::packet::Packet;
 use crate::structs::data_manager::DataManager;
 
+// struct to store all information on the current demo
+
 pub struct Demo {
     pub header: DemoHeader,
     pub packets: Vec<Packet>,

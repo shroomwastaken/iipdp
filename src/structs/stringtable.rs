@@ -6,6 +6,11 @@ use crate::structs::packet_data_types::StringTables;
 
 // all of this information is from UntitledParser
 
+// stringtables contain data that the engine uses to figure out what assets to load in
+// theyre referenced by different net svc messages which is why it's good to store them somewhere for later use
+// every stringtable has x amount of entries and y amount of classes
+// theres different types of stringtables (all can be found here just scroll)
+
 pub struct StringTable {
     pub name: String,
     pub entry_count: i32,
@@ -107,6 +112,9 @@ impl StringTableClass {
 }
 
 // entry data types
+
+// only appears once in p1, dont know about other games but it would make sense if
+// it were to appear more times the more players there were in a multiplayer game
 #[derive(PartialEq)]
 pub struct PlayerInfo {
     // steam id stuff only exists on demo protocol 4 so im not gonna bother yet
@@ -150,6 +158,7 @@ impl PlayerInfo {
     }
 }
 
+// no clue what this does tbh
 #[derive(PartialEq)]
 pub struct QueryPort {
     pub port: i32,
@@ -161,8 +170,10 @@ impl QueryPort {
     }
 }
 
+// has some data about entities
 pub struct InstanceBaseline; // not until i do datatable stuff
 
+// just strings
 #[derive(PartialEq)]
 pub struct StringEntryData {
     pub str: String,
@@ -174,12 +185,16 @@ impl StringEntryData {
     }
 }
 
+// this containts the flicker patterns of lights according to uncrafted
 #[derive(PartialEq)]
 pub struct LightStyle {
     pub values: Vec<u8>,
 }
 
 impl LightStyle {
+    // the str string is the way the options are presented in hammer,
+    // untitled parser does this weird thing with each character to represent more
+    // 'accurate' light levels
     pub fn parse(reader: &mut BitReader) -> Self {
         let str = reader.read_ascii_string_nulled();
         let values: Vec<u8> = str.chars().map(|c| ((c as u32 - 'a' as u32) * 22) as u8).collect::<_>(); // idk
@@ -187,6 +202,7 @@ impl LightStyle {
     }
 }
 
+// tells the engine what assets to load iirc
 #[derive(PartialEq)]
 pub struct PrecacheData {
     pub flags: PrecacheFlags,

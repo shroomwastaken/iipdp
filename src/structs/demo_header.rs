@@ -1,5 +1,10 @@
 use crate::bitreader::BitReader;
 
+// the first 1072 bytes of the demo contain the "header" which
+// contatins all of the important info about the demo
+// for example we infer information about the games version with the network protocol
+// this is the stuff that gets printed out to the console when the user parses the demo without the -dump option
+
 pub struct DemoHeader {
     pub demo_file_stamp: String,
     pub demo_protocol: i32,

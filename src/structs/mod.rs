@@ -1,3 +1,5 @@
+// declaring all the modules in the structs folder
+
 pub mod demo;
 pub mod demo_header;
 pub mod packet;

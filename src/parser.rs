@@ -15,7 +15,7 @@ use crate::structs::user_cmd_info::UserCmdInfo;
     WARNING: BEAUTIFUL CODE AHEAD
 */
 
-// takes file bytes (contents);
+// takes reader and demo references
 // returns a vector of Packet;
 pub fn get_packets(reader: &mut BitReader, demo: &mut Demo) -> Vec<Packet> {
     let mut packets: Vec<Packet> = Vec::new();
@@ -46,7 +46,7 @@ pub fn get_packets(reader: &mut BitReader, demo: &mut Demo) -> Vec<Packet> {
     }
 }
 
-// takes file bytes (contents), start index (start), message type (msg_type);
+// takes reader reference, the current packet type, a reference to the demos data manager and the current packets tick
 // returns packet data wrapped in PacketDataType enum;
 fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_mgr: &mut DataManager, cur_tick: i32) -> PacketDataType {
     let packet_data: PacketDataType;

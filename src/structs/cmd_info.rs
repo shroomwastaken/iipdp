@@ -1,5 +1,10 @@
 use crate::bitreader::BitReader;
 
+// cmdinfo is present in every Packet packet and contains information about
+// where the player is looking and what their position is
+// there are MSSC amount of these in every Packet packet
+// MSSC being MaxSplitScreenClients, which is 1 for p1, 2 for p2 and 4(?) for l4d games
+
 pub struct CmdInfo {
     pub flags: i32,
     pub view_origin: Vec<f32>,

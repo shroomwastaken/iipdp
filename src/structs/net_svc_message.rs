@@ -55,6 +55,10 @@ pub enum NetSvcMessageDataTypes {
     SvcPaintmapData(SvcPaintmapData),
 }
 
+// implementing into<> for every type is necessary for
+// getting every messages data later for dumping
+// there is probably a way to do this with 4 lines with some external crate
+// but i dont want to add more dependencies if i dont have to
 impl Into<NetDisconnect> for NetSvcMessageDataTypes {
     fn into(self) -> NetDisconnect {
         match self {
@@ -391,6 +395,8 @@ pub enum NetSvcMessageTypes {
     SvcPaintmapData,
 }
 
+// these values are pretty much the same in p1 and p2 (except for SvcPrint)
+// this is gonna become larger once i do other games
 impl NetSvcMessageTypes {
     pub fn from_int(value: i32) -> NetSvcMessageTypes {
         return match value {
@@ -499,6 +505,7 @@ pub fn parse(reader: &mut BitReader, demo_data_mgr: &mut DataManager, size: i32)
     return messages;
 }
 
+// this is why all the into's are needed
 #[allow(unused)]
 pub fn write_msg_data_to_file(file: &mut File, messages: Vec<NetSvcMessage>, data_mgr: &DataManager) {
     for message in messages {

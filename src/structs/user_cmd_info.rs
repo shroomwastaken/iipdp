@@ -1,5 +1,10 @@
 use crate::bitreader::BitReader;
 
+// has info about the players view angles, how much they moved their mouse
+// what buttons they pressed etc.
+// dont know what the difference is between view angles here and in cmdinfo
+// all of the values in UserCmdInfo are Optional, meaning that the value exists only if the bit before its supposed value is 1; 
+
 pub struct UserCmdInfo {
     pub command_number: Option<i32>,
     pub tick_count: Option<i32>,
@@ -37,8 +42,7 @@ impl UserCmdInfo {
         }
     }
 
-    // theres a better way to do this
-    // im sorry to anyone who looks at this
+    // this used to be some really bad code but its fine now
     pub fn parse(reader: &mut BitReader) -> Self {
         let command_number: Option<i32> = reader.read_int_if_exists(32);
         let tick_count: Option<i32> = reader.read_int_if_exists(32);
@@ -74,6 +78,5 @@ impl UserCmdInfo {
             mouse_dx: mouse_dx,
             mouse_dy: mouse_dy,
         }
-        // all of the values in UserCmdInfo are Optional, meaning that the value exists only if the bit before its supposed value is 1; 
     }
 }

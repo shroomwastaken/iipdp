@@ -6,6 +6,8 @@ pub struct BitReader {
 }
 
 impl BitReader {
+    // this is pretty unoptimized, only reads one bit at a time
+    // todo make this better by fetching a u64 at a time and shifting that or somehing idk
     pub fn read_bits(&mut self, num_bits: i32) -> Vec<u8> {
         let mut result:  Vec<u8> = Vec::new();
         let mut bits_left = num_bits;
@@ -21,6 +23,7 @@ impl BitReader {
         return result;
     }
 
+    // clones the bitreader and skips amount bits in the parent one
     pub fn split_and_skip(&mut self, amount: i32) -> Self {
         let new_reader = BitReader { contents: self.contents.clone(), cur_bit_index: self.cur_bit_index };
 
@@ -29,10 +32,12 @@ impl BitReader {
         return new_reader;
     }
 
+    // self-explanantory
     pub fn skip(&mut self, amount: i32) {
         self.cur_bit_index += amount;
     }
 
+    // could maybe be better but whatever
     pub fn read_int(&mut self, amount: i32) -> i32 {
         let bytes = self.read_bits(amount);
         return match bytes.len() {
@@ -44,10 +49,12 @@ impl BitReader {
         }
     }
 
+    // used once, dont remember where
     pub fn read_uint_64(&mut self) -> u64 {
         return u64::from_le_bytes(self.read_bits(64).as_slice().try_into().unwrap());
     }
 
+    // same as read_int function but float :0
     pub fn read_float(&mut self, amount: i32) -> f32 {
         let bytes = self.read_bits(amount);
         return (match bytes.len() {
@@ -59,6 +66,8 @@ impl BitReader {
         } * 1000.0).round() / 1000.0
     }
 
+    // read ascii string without a determined length,
+    // all(?) ascii strings in the demo are null terminated
     pub fn read_ascii_string_nulled(&mut self) -> String {
         let mut char_vec: Vec<u8> = Vec::new();
         let mut byte = self.read_bits(8)[0];
@@ -77,10 +86,13 @@ impl BitReader {
         return res;
     }
 
+    // read ascii string that has a determined length
+    // used mostly in the header
     pub fn read_ascii_string(&mut self, amount: i32) -> String {
         return String::from_utf8(self.read_bits(amount)).unwrap().trim_end_matches("\0").to_string();
     }
 
+    // also used once
     pub fn read_bytes(&mut self, amount: i32) -> Vec<u8> {
         let mut res: Vec<u8> = Vec::new();
         for _ in 0..amount {
@@ -91,10 +103,15 @@ impl BitReader {
         return res;
     }
 
+    // used a couple of times
+    // rust doesnt have a built in vector3 type (iirc)
+    // this just reads a Vec3, for more go to utils.rs line 222
     pub fn read_vec3(&mut self) -> Vec3 {
         return Vec3 { x: self.read_float(32), y: self.read_float(32), z: self.read_float(32) };
     }
 
+    // weird function that i just took from nekz.me
+    // seems to work properly so ¯\_(ツ)_/¯
     pub fn read_vector_coord(&mut self) -> f32 {
         const COORD_INTEGER_BITS: i32 = 14;
         const COORD_FRACTIONAL_BITS: i32 = 5;
@@ -124,6 +141,7 @@ impl BitReader {
         return value
     }
 
+    // calls the previous function for x, y, and z coords
     pub fn read_vector_coords(&mut self) -> Vec<Option<f32>> {
         let (x, y, z) = (self.read_bool(), self.read_bool(), self.read_bool());
 
@@ -136,10 +154,14 @@ impl BitReader {
         return coords_vec;
     }
 
+    // ehandle reader, no clue what ehandles really are yet, ask uncrafted
+    // for more info on the Ehandle type go to utils.rs
     pub fn read_ehandle(&mut self) -> EHandle { return EHandle { val: self.read_int(32)} }
 
+    // do i need to explain this
     pub fn read_bool(&mut self) -> bool { return self.read_bits(1)[0] == 1; }
 
+    // the read_x_if_exists functions only read amount bits if the next bit is set
     pub fn read_int_if_exists(&mut self, amount: i32) -> Option<i32> { return if self.read_bool() { Some(self.read_int(amount)) } else { None } }
 
     pub fn read_float_if_exists(&mut self, amount: i32) -> Option<f32> { return if self.read_bool() { Some(self.read_float(amount)) } else { None } }

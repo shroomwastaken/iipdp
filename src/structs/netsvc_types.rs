@@ -4,6 +4,10 @@ use crate::structs::utils;
 use crate::structs::data_manager::DataManager;
 use crate::structs::{user_message::{UserMessageType, UserMessage}, data_manager::Game};
 
+/*
+this has all of the parsing for net/svc message types
+*/
+
 // contains no data
 #[derive(Clone)]
 pub struct NetNop;
@@ -121,6 +125,7 @@ impl NetSignonState {
     }
 }
 
+// most important message
 #[derive(Clone)]
 pub struct SvcServerInfo {
     pub protocol: i32,
@@ -241,6 +246,12 @@ impl SvcSetPause {
         Self { paused: reader.read_bool() }
     }
 }
+
+// the next 2 messages are pretty important but
+// their data (the last field of both structs)
+// is mega hard and weird to parse so they do nothing yet
+// they pretty much replicate the stringtables packet
+// so its a mystery why they exist
 
 #[derive(Clone)]
 pub struct SvcCreateStringTable {
@@ -386,6 +397,8 @@ impl SvcPrint {
     }
 }
 
+// apparently this messages data parsing made uncrafted want to cry
+// oh boy am i looking forward to implementing that
 #[derive(Clone)]
 pub struct SvcSounds {
     pub reliable_sound: bool,
@@ -491,6 +504,8 @@ impl SvcBspDecal {
     }
 }
 
+// honestly dont know why i implemented this
+// this is p2 only, i dont even have any other p2 stuff
 #[derive(Clone)]
 pub struct SvcSplitScreen {
     pub s_type: i32,
@@ -510,6 +525,8 @@ impl SvcSplitScreen {
     }
 }
 
+// i hate this message in ints entirety
+// see user_message.rs (yup that 1300 line monstrosity)
 #[derive(Clone)]
 pub struct SvcUserMessage {
     pub length: i32,
@@ -529,6 +546,9 @@ impl SvcUserMessage {
     }
 }
 
+// this, and all other messages that have "entity" in their names
+// have not been properly implemented yet, because i havent done
+// any datatable stuff. will be done once i do that
 #[derive(Clone)]
 pub struct SvcEntityMessage {
     pub entity_index: i32,
@@ -550,6 +570,10 @@ impl SvcEntityMessage {
     }
 }
 
+// find the gameeventlist
+// look at descriptor, find the corresponding game event (using the id stored in the descriptor)
+// look at keys that are supposed to be stored (i.e. {"userid": int32})
+// parse the keys accordingly and populate the keys field of GameEvent struct
 #[derive(Clone)]
 pub struct SvcGameEvent {
     pub length: i32,
@@ -661,6 +685,7 @@ impl SvcPrefetch {
     }
 }
 
+// no clue what this is
 #[derive(Clone)]
 pub struct SvcMenu {
     pub menu_type: i32,

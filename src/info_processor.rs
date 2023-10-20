@@ -39,6 +39,7 @@ pub fn print_header_info(demo: Demo) {
         println!("Measured Time: {}", format!("{}:{:02}.{:.0}", minutes, seconds, millis * 1000.0));
     }
 
+    // only print adjusted time if there were any adjustments made
     if measured_ticks_and_time != adjusted_ticks_and_time {
         println!("\nAdjusted Ticks: {}",  (adjusted_ticks_and_time.0));
 
@@ -53,6 +54,7 @@ pub fn print_header_info(demo: Demo) {
     }
 }
 
+// i should really move all of this out to their own functions
 #[allow(unused)]
 pub fn dump_file(file_path: &String, demo: Demo) {
     let mut file = fs::File::create(file_path.trim_end_matches(".dem").to_owned() + "-demo_dump.txt").unwrap_or_else( |err| {

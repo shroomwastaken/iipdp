@@ -1,5 +1,8 @@
 use crate::structs::packet_data_types as pdt;
 
+// packets are how all of the demos data (except the header) is stored
+// for every packet there is its type, its tick, its slot (only on demo protocol 4), and its data (see packet_data_types.rs)
+
 #[derive(Clone, Copy, PartialEq)]
 pub enum PacketType {
     Unknown = 0,
@@ -40,6 +43,7 @@ pub enum PacketDataType {
     StringTables(pdt::StringTables),
 }
 
+// all the into<> are required to later extrapolate the data from the enum
 impl Into<pdt::PP> for PacketDataType {
     fn into(self) -> pdt::PP {
         match self {

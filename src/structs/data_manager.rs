@@ -2,6 +2,11 @@ use crate::structs::utils::GameEventList;
 use crate::structs::demo_header::DemoHeader;
 use crate::structs::user_message::UserMessageType;
 
+// will be used more later in development
+// for now this stores information vital for parsing the demo
+// all of it is inferred from the demo header
+// later all the datatable and stringtable stuff will be stored here so that its data can be fetched by other messages
+
 #[allow(non_camel_case_types)]
 #[derive(PartialEq)]
 pub enum Game {
@@ -40,6 +45,7 @@ impl DataManager {
         }
     }
 
+    // all of the info i need (for now) can be inferred from the demo header
     pub fn get_info_from_header(&mut self, header: &DemoHeader) {
         self.demo_protocol = header.demo_protocol;
         self.network_protocol = header.network_protocol;
@@ -171,10 +177,12 @@ impl DataManager {
         };
     }
 
+    // add one because 0th tick (?)
     pub fn get_measured_ticks_and_time(&self) -> (i32, f32) {
         return (self.last_packet_tick + 1, ((self.last_packet_tick as f32) + 1f32) * 0.015)
     }
 
+    // this has a bunch of "+ 1" because yes
     pub fn get_adjusted_ticks_and_time(&self) -> (i32, f32) {
         if self.adj_end_tick == 0 && self.adj_start_tick != 0 {
             return (self.last_packet_tick - self.adj_start_tick + 1, ((self.last_packet_tick - self.adj_start_tick + 1) as f32 * 0.015));
