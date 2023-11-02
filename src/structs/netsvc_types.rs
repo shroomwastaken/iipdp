@@ -210,7 +210,7 @@ pub struct SvcClassInfo {
 }
 
 impl SvcClassInfo {
-    pub fn parse(reader: &mut BitReader) -> Self {
+    pub fn parse(reader: &mut BitReader, data_mgr: &mut DataManager) -> Self {
         let length = reader.read_int(16);
         let create_on_client = reader.read_bool();
         let mut server_classes: Vec<utils::ServerClass> = Vec::new();
@@ -220,12 +220,13 @@ impl SvcClassInfo {
 
                 let mut cur_server_class: utils::ServerClass = utils::ServerClass::new();
 
-                cur_server_class.class_id = reader.read_int((length as f32).log2() as i32 + 1);
+                cur_server_class.datatable_id = reader.read_int((length as f32).log2() as i32 + 1);
                 cur_server_class.class_name = reader.read_ascii_string_nulled();
                 cur_server_class.data_table_name = reader.read_ascii_string_nulled();
 
                 server_classes.push(cur_server_class);
             }
+            data_mgr.server_class_info = server_classes.clone();
         }
 
         Self {

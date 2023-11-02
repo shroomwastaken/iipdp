@@ -40,16 +40,16 @@ impl ConVar {
 }
 
 // for SvcClassInfo
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct ServerClass {
-    pub class_id: i32,
+    pub datatable_id: i32,
     pub class_name: String,
     pub data_table_name: String,
 }
 
 impl ServerClass {
     pub fn new() -> Self {
-        Self { class_id: 0, class_name: "".to_string(), data_table_name: "".to_string() }
+        Self { datatable_id: 0, class_name: "".to_string(), data_table_name: "".to_string() }
     }
 }
 
