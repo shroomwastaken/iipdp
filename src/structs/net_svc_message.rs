@@ -472,7 +472,7 @@ pub fn parse(reader: &mut BitReader, demo_data_mgr: &mut DataManager, size: i32)
             nsmt::NetStringCmd => cur_message.data = nsmdt::NetStringCmd(nt::NetStringCmd::parse(reader)),
             nsmt::NetTick => cur_message.data = nsmdt::NetTick(nt::NetTick::parse(reader)),
             nsmt::SvcBspDecal => cur_message.data = nsmdt::SvcBspDecal(nt::SvcBspDecal::parse(reader)),
-            nsmt::SvcClassInfo => cur_message.data = nsmdt::SvcClassInfo(nt::SvcClassInfo::parse(reader)),
+            nsmt::SvcClassInfo => cur_message.data = nsmdt::SvcClassInfo(nt::SvcClassInfo::parse(reader, demo_data_mgr)),
             nsmt::SvcCmdKeyValues => cur_message.data = nsmdt::SvcCmdKeyValues(nt::SvcCmdKeyValues::parse(reader)),
             nsmt::SvcCreateStringTable => cur_message.data = nsmdt::SvcCreateStringTable(nt::SvcCreateStringTable::parse(reader, demo_data_mgr)),
             nsmt::SvcCrosshairAngle => cur_message.data = nsmdt::SvcCrosshairAngle(nt::SvcCrosshairAngle::parse(reader)),
@@ -609,7 +609,7 @@ pub fn write_msg_data_to_file(file: &mut File, messages: Vec<NetSvcMessage>, dat
                 if !msg_data.create_on_client {
                     file.write(":".as_bytes());
                     for server_class in msg_data.server_classes {
-                        file.write_fmt(format_args!("\n\t\t\t[{}] {} ({})", server_class.class_id, server_class.class_name, server_class.class_name));
+                        file.write_fmt(format_args!("\n\t\t\t[{}] {} ({})", server_class.datatable_id, server_class.class_name, server_class.class_name));
                     }
                 }
             },

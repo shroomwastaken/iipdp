@@ -2,6 +2,8 @@ use crate::structs::cmd_info::CmdInfo;
 use crate::structs::user_cmd_info::UserCmdInfo;
 use crate::structs::net_svc_message::NetSvcMessage;
 use crate::structs::stringtable::StringTable;
+use crate::structs::send_table::SendTable;
+use crate::structs::utils::ServerClass;
 
 // just definitions for all the packet types, should move parsing here too
 
@@ -58,11 +60,15 @@ impl UserCmd {
 // contains a lot of datatables which have data about entities
 pub struct DataTables {
     pub size: i32,
+    pub send_table_count: i32,
+    pub send_tables: Vec<SendTable>,
+    pub class_count: i32,
+    pub server_classes: Vec<ServerClass>,
 }
 
 impl DataTables {
     pub fn new() -> Self {
-        Self { size: 0 }
+        Self { size: 0, send_table_count: 0, send_tables: Vec::new(), class_count: 0, server_classes: Vec::new() }
     }
 }
 

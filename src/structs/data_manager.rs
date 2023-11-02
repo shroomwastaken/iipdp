@@ -1,6 +1,7 @@
-use crate::structs::utils::GameEventList;
+use crate::structs::utils::{GameEventList, ServerClass};
 use crate::structs::demo_header::DemoHeader;
 use crate::structs::user_message::UserMessageType;
+use crate::structs::send_table::SendPropType;
 
 // will be used more later in development
 // for now this stores information vital for parsing the demo
@@ -28,6 +29,9 @@ pub struct DataManager {
     pub net_svc_type_bits: i32,
     pub adj_start_tick: i32,
     pub adj_end_tick: i32,
+    pub server_class_info: Vec<ServerClass>,
+    pub send_prop_amount_of_bits_to_get_num_bits: i32, // hehehe
+    pub send_prop_type_list: Vec<SendPropType>
 }
 
 impl DataManager {
@@ -42,6 +46,9 @@ impl DataManager {
             net_svc_type_bits: 6, // default for everything other than 3420 iirc
             adj_start_tick: 0,
             adj_end_tick: 0,
+            server_class_info: Vec::new(),
+            send_prop_amount_of_bits_to_get_num_bits: 0,
+            send_prop_type_list: Vec::new(),
         }
     }
 
@@ -84,7 +91,15 @@ impl DataManager {
                     UserMessageType::AchievementEvent,
                     UserMessageType::EntityPortalled,
                     UserMessageType::KillCam
-                ]
+                ];
+                self.send_prop_amount_of_bits_to_get_num_bits = 6;
+                self.send_prop_type_list = Vec::new();
+                self.send_prop_type_list.push(SendPropType::Int);
+                self.send_prop_type_list.push(SendPropType::Float);
+                self.send_prop_type_list.push(SendPropType::Vector3);
+                self.send_prop_type_list.push(SendPropType::String);
+                self.send_prop_type_list.push(SendPropType::Array);
+                self.send_prop_type_list.push(SendPropType::DataTable);
             },
             15 => {
                 self.game = Game::PORTAL_1_5135;
@@ -125,7 +140,16 @@ impl DataManager {
                     UserMessageType::HapSetDrag,
                     UserMessageType::HapSetConstForce,
                     UserMessageType::HapMeleeContact
-                ]
+                ];
+                self.send_prop_amount_of_bits_to_get_num_bits = 7;
+                self.send_prop_type_list = Vec::new();
+                self.send_prop_type_list.push(SendPropType::Int);
+                self.send_prop_type_list.push(SendPropType::Float);
+                self.send_prop_type_list.push(SendPropType::Vector3);
+                self.send_prop_type_list.push(SendPropType::Vector2);
+                self.send_prop_type_list.push(SendPropType::String);
+                self.send_prop_type_list.push(SendPropType::Array);
+                self.send_prop_type_list.push(SendPropType::DataTable);
             },
             24 => {
                 self.game = Game::PORTAL_1_1910503;
@@ -171,7 +195,16 @@ impl DataManager {
                     UserMessageType::HapSetDrag,
                     UserMessageType::HapSetConstForce,
                     UserMessageType::HapMeleeContact
-                ]
+                ];
+                self.send_prop_amount_of_bits_to_get_num_bits = 7;
+                self.send_prop_type_list = Vec::new();
+                self.send_prop_type_list.push(SendPropType::Int);
+                self.send_prop_type_list.push(SendPropType::Float);
+                self.send_prop_type_list.push(SendPropType::Vector3);
+                self.send_prop_type_list.push(SendPropType::Vector2);
+                self.send_prop_type_list.push(SendPropType::String);
+                self.send_prop_type_list.push(SendPropType::Array);
+                self.send_prop_type_list.push(SendPropType::DataTable);
             },
             _ => self.game = Game::UNKNOWN
         };

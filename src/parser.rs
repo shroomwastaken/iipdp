@@ -8,6 +8,8 @@ use crate::bitreader::BitReader;
 use crate::structs::packet_data_types::{PP, ConsoleCmd, UserCmd, SyncTick, StringTables, DataTables, Stop};
 use crate::structs::stringtable::StringTable;
 use crate::structs::user_cmd_info::UserCmdInfo;
+use crate::structs::send_table::SendTable;
+use crate::structs::utils::ServerClass;
 
 // all information about the .dem file structure was taken from https://nekz.me/dem/demo.html and UntitledParser
 
@@ -82,8 +84,28 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
         PacketType::DataTables => {
             let mut data = DataTables::new();
             data.size = reader.read_int(32);
-            // no parsing yet so just skip
-            reader.skip((data.size * 8) as i32);
+            let index_before_parsing = reader.cur_bit_index;
+            
+            while reader.read_bool() {
+                let table = SendTable::parse(reader, demo_data_mgr);
+                data.send_tables.push(table);
+            }
+
+            data.class_count = reader.read_int(16);
+            for _ in 0..data.class_count {
+                let mut server_class = ServerClass::new();
+                // if we didnt get an SvcClassInfo yet (?)
+                if demo_data_mgr.server_class_info == Vec::new() {
+                    server_class.datatable_id = reader.read_int(16);
+                } else {
+                    server_class.datatable_id = reader.read_int(((demo_data_mgr.server_class_info.len() as f32).log2() + 1f32) as i32);
+                }
+                server_class.class_name = reader.read_ascii_string_nulled();
+                server_class.data_table_name = reader.read_ascii_string_nulled();
+            }
+            data.send_table_count = data.send_tables.len() as i32;
+
+            reader.cur_bit_index = index_before_parsing + data.size * 8;
 
             packet_data = PacketDataType::DataTables(data);
         },
