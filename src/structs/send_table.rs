@@ -1,6 +1,8 @@
 use crate::bitreader::BitReader;
 use crate::enum_primitive::enum_from_primitive;
 use crate::structs::data_manager::DataManager;
+use std::fs::File;
+use std::io::Write;
 
 pub struct SendTable {
     pub needs_decoder: bool,
@@ -56,7 +58,7 @@ impl SendTableProp {
             exclude_dt_name = Some(reader.read_ascii_string_nulled());
         } else {
             match send_prop_type {
-                SendPropType::String | SendPropType::Int | SendPropType::Float | SendPropType::Vector3 => {
+                SendPropType::String | SendPropType::Int | SendPropType::Float | SendPropType::Vector3 | SendPropType::Vector2 => {
                     low_value = Some(reader.read_float(32));
                     high_value = Some(reader.read_float(32));
                     num_bits = Some(reader.read_int(data_mgr.send_prop_amount_of_bits_to_get_num_bits));
@@ -82,7 +84,7 @@ impl SendTableProp {
 }
 
 enum_from_primitive! {
-    #[derive(Debug, Clone,PartialEq)]
+    #[derive(Debug, Clone, PartialEq)]
     pub enum SendPropType {
         Int,
         Float,
@@ -91,6 +93,20 @@ enum_from_primitive! {
         String,
         Array,
         DataTable,
+    }
+}
+
+impl Into<&str> for SendPropType {
+    fn into(self) -> &'static str {
+        match self {
+            Self::Int => "Int",
+            Self::Float => "Float",
+            Self::Vector2 => "Vector2",
+            Self::Vector3 => "Vector3",
+            Self::String => "String",
+            Self::Array => "Array",
+            Self::DataTable => "DataTable",
+        }
     }
 }
 
@@ -113,5 +129,64 @@ bitflags::bitflags! {
         const CoordMp = 1 << 13;
         const CoordMpLp = 1 << 14; // low precision
         const CoordMpInt = 1 << 15;
+    }
+}
+
+// this function will make you wonder why i chose programming instead of something else as a hobby
+#[allow(unused)]
+pub fn write_send_table_data_to_file(file: &mut File, table: SendTable) {
+    file.write_fmt(format_args!("\n\t\t{}, Needs Decoder: {}, Prop Count: {}", table.name, table.needs_decoder, table.prop_count));
+    for prop in table.prop_list {
+        // this is fun
+        let mut base_str = "                                                                                                                        ".to_string();
+        
+        let type_len = match prop.send_prop_type {
+            SendPropType::Int => 3,
+            SendPropType::Float | SendPropType::Array => 5,
+            SendPropType::String => 6,
+            SendPropType::Vector2 | SendPropType::Vector3 => 7,
+            SendPropType::DataTable => 9,
+        };
+        base_str.replace_range(0..type_len, prop.send_prop_type.clone().into());
+
+        base_str.replace_range(15..15 + prop.name.len(), &prop.name);
+
+        if prop.send_prop_type == SendPropType::DataTable || prop.flags.contains(PropFlag::Exclude) {
+            base_str.replace_range(46..46 + prop.exclude_dt_name.clone().unwrap().len(), &prop.exclude_dt_name.unwrap());
+        } else {
+            match prop.send_prop_type {
+                SendPropType::String | SendPropType::Int | SendPropType::Float | SendPropType::Vector3 | SendPropType::Vector2 => {
+                    base_str.replace_range(46..51, "Low: ");
+                    base_str.replace_range(52..52 + prop.low_value.unwrap().to_string().len(), &prop.low_value.unwrap().to_string());
+                    
+                    base_str.replace_range(62..68, "High: ");
+                    base_str.replace_range(69..69 + prop.high_value.unwrap().to_string().len(), &prop.high_value.unwrap().to_string());
+                    
+                    base_str.replace_range(88..94, "Bits: ");
+                    base_str.replace_range(95..95 + prop.num_bits.unwrap().to_string().len(), &prop.num_bits.unwrap().to_string());
+                },
+                SendPropType::Array => {
+                    base_str.replace_range(46..56, "Elements: ");
+                    base_str.replace_range(57..57 + prop.num_elements.unwrap().to_string().len(), &prop.num_elements.unwrap().to_string());
+                },
+                SendPropType::DataTable => {}
+            }
+        }
+
+        let mut flag_str = "Flags: ".to_string();
+        for name in prop.flags.iter_names() {
+            flag_str.push_str(name.0);
+            flag_str.push_str(" | ");
+        }
+
+        if prop.flags.iter_names().count() == 0 {
+            flag_str.push_str("None");
+        } else {
+            flag_str = flag_str[..flag_str.len() - 3].to_string();
+        }
+        
+        base_str.push_str(&flag_str);
+
+        file.write_fmt(format_args!("\n\t\t\t{}", base_str));
     }
 }

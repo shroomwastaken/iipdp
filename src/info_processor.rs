@@ -4,6 +4,7 @@ use crate::structs::{packet_data_types as pdt, net_svc_message};
 use crate::structs::cmd_info::CmdInfo;
 use crate::structs::user_cmd_info::UserCmdInfo;
 use crate::structs::stringtable::write_stringtables_data_to_file;
+use crate::structs::send_table::write_send_table_data_to_file;
 use std::path::Path;
 use std::fs;
 use std::io::Write;
@@ -187,8 +188,16 @@ pub fn dump_file(file_path: &String, demo: Demo) {
         } else if cur_packet_type == PacketType::DataTables {
             let packet_data: pdt::DataTables = packet.data.into();
             file.write_fmt(format_args!("[{}] DATATABLES (6)\n", packet.tick));
-            file.write_fmt(format_args!("\tData Size (bytes): {}\n", packet_data.size));
-            file.write_all("\tNO DATA AVAILABLE YET\n".as_bytes());
+            file.write_fmt(format_args!("\tData Size (bytes): {}", packet_data.size));
+            file.write_fmt(format_args!("\n\t{} send tables", packet_data.send_table_count));
+            for table in packet_data.send_tables {
+                write_send_table_data_to_file(&mut file, table);
+            }
+            file.write_fmt(format_args!("\n\t{} server classes", packet_data.class_count));
+            for class in packet_data.server_classes {
+                file.write_fmt(format_args!("\n\t\t[{}] {} ({})", class.datatable_id, class.class_name, class.data_table_name));
+            }
+            file.write_all("\n".as_bytes());
             
         } else if cur_packet_type == PacketType::Stop {
             file.write_fmt(format_args!("[{}] STOP (7)\n", packet.tick));
