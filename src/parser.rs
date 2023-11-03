@@ -102,6 +102,8 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
                 }
                 server_class.class_name = reader.read_ascii_string_nulled();
                 server_class.data_table_name = reader.read_ascii_string_nulled();
+
+                data.server_classes.push(server_class);
             }
             data.send_table_count = data.send_tables.len() as i32;
 
