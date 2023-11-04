@@ -3,6 +3,7 @@ use std::io::Write;
 use bitflags::bitflags;
 use crate::bitreader::BitReader;
 use crate::structs::packet_data_types::StringTables;
+use crate::structs::utils::bitflags_to_string;
 
 // all of this information is from UntitledParser
 
@@ -281,11 +282,15 @@ pub fn write_stringtables_data_to_file(file: &mut File, data: StringTables) {
         for entry in table.table_entries {
             if entry.entry_data != StringTableEntryDataTypes::None {
                 if table.name.contains("precache") {
+                    let mut base_str = "                                                                                          ".to_string();
                     let entry_data: PrecacheData = entry.entry_data.into();
-                    file.write_fmt(format_args!("\n\t\t\t{}: {:?}", entry.name, entry_data.flags));
+                    base_str.replace_range(0..entry.name.len(), &entry.name);
+                    base_str.push_str("Flags: ");
+                    base_str.push_str(&bitflags_to_string(entry_data.flags.iter_names()));
+                    file.write_fmt(format_args!("\n\t\t\t{}", base_str));
                 } else if table.name == "GameRulesCreation" || table.name == "InfoPanel" {
                     let entry_data: StringEntryData = entry.entry_data.into();
-                    file.write_fmt(format_args!("\n\t\t\tEntry Name: {}, Data: {}", entry.name, entry_data.str));
+                    file.write_fmt(format_args!("\n\t\t\t{}: {}", entry.name, entry_data.str));
                 } else if table.name == "userinfo" {
                     let entry_data: PlayerInfo = entry.entry_data.into();
                     file.write_fmt(format_args!("\n\t\t\tEntry Name: {}", entry.name));
