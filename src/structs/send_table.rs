@@ -3,6 +3,7 @@ use crate::enum_primitive::enum_from_primitive;
 use crate::structs::data_manager::DataManager;
 use std::fs::File;
 use std::io::Write;
+use crate::structs::utils::bitflags_to_string;
 
 pub struct SendTable {
     pub needs_decoder: bool,
@@ -138,7 +139,7 @@ pub fn write_send_table_data_to_file(file: &mut File, table: SendTable) {
     file.write_fmt(format_args!("\n\t\t{}, Needs Decoder: {}, Prop Count: {}", table.name, table.needs_decoder, table.prop_count));
     for prop in table.prop_list {
         // this is fun
-        let mut base_str = "                                                                                                                        ".to_string();
+        let mut base_str = "                                                                                                         ".to_string();
         
         let type_len = match prop.send_prop_type {
             SendPropType::Int => 3,
@@ -174,16 +175,7 @@ pub fn write_send_table_data_to_file(file: &mut File, table: SendTable) {
         }
 
         let mut flag_str = "Flags: ".to_string();
-        for name in prop.flags.iter_names() {
-            flag_str.push_str(name.0);
-            flag_str.push_str(" | ");
-        }
-
-        if prop.flags.iter_names().count() == 0 {
-            flag_str.push_str("None");
-        } else {
-            flag_str = flag_str[..flag_str.len() - 3].to_string();
-        }
+        flag_str.push_str(&bitflags_to_string(prop.flags.iter_names()));
         
         base_str.push_str(&flag_str);
 

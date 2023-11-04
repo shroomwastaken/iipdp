@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::Write;
 
 use crate::bitreader::BitReader;
-use crate::structs::utils::{Vec3, EHandle};
+use crate::structs::utils::{Vec3, EHandle, bitflags_to_string};
 use crate::enum_primitive::enum_from_primitive;
 use crate::enum_primitive::FromPrimitive;
 use crate::bitflags::bitflags;
@@ -1186,13 +1186,13 @@ pub fn write_usermsg_data_to_file(msg: UserMessage, file: &mut File) {
             let data: CloseCaption = msg.data.into();
             file.write_fmt(format_args!("\n\t\t\tToken Name: {}", data.token_name));
             file.write_fmt(format_args!("\n\t\t\tDuration: {}", data.duration));
-            file.write_fmt(format_args!("\n\t\t\tFlags: {:?}", data.flags));
+            file.write_fmt(format_args!("\n\t\t\tFlags: {}", bitflags_to_string(data.flags.iter_names())));
         },
         UserMessageType::Damage => {
             let data: Damage = msg.data.into();
             file.write_fmt(format_args!("\n\t\t\tArmor: {}", data.armor));
             file.write_fmt(format_args!("\n\t\t\tDamage Taken: {}", data.damage_taken));
-            file.write_fmt(format_args!("\n\t\t\tVisible Bits Damage: {:?}", data.visible_bits_damage));
+            file.write_fmt(format_args!("\n\t\t\tVisible Bits Damage: {}", bitflags_to_string(data.visible_bits_damage.iter_names())));
             file.write_fmt(format_args!("\n\t\t\tVec From: {}", data.vec_from));
         },
         UserMessageType::EntityPortalled => {
@@ -1206,7 +1206,7 @@ pub fn write_usermsg_data_to_file(msg: UserMessage, file: &mut File) {
             let data: Fade = msg.data.into();
             file.write_fmt(format_args!("\n\t\t\tDuration: {}", data.duration));
             file.write_fmt(format_args!("\n\t\t\tHold Time: {}", data.hold_time));
-            file.write_fmt(format_args!("\n\t\t\tFlags: {:?}", data.flags));
+            file.write_fmt(format_args!("\n\t\t\tFlags: {}", bitflags_to_string(data.flags.iter_names())));
             file.write_fmt(format_args!("\n\t\t\tRGBA: {}, {}, {}, {}", data.r, data.g, data.b, data.a));
         },
         UserMessageType::Geiger => {
@@ -1286,7 +1286,7 @@ pub fn write_usermsg_data_to_file(msg: UserMessage, file: &mut File) {
             let data: PortalFXSurface = msg.data.into();
             file.write_fmt(format_args!("\n\t\t\tPortal Ent: {}", data.portal_ent));
             file.write_fmt(format_args!("\n\t\t\tOwner Ent: {}", data.owner_ent));
-            file.write_fmt(format_args!("\n\t\t\tTEam: {}", data.team));
+            file.write_fmt(format_args!("\n\t\t\tTeam: {}", data.team));
             file.write_fmt(format_args!("\n\t\t\tPortal Num: {}", data.portal_num));
             file.write_fmt(format_args!("\n\t\t\tEffect: {:?}", data.effect));
             file.write_fmt(format_args!("\n\t\t\tOrigin: {}, {}, {}",
@@ -1309,7 +1309,7 @@ pub fn write_usermsg_data_to_file(msg: UserMessage, file: &mut File) {
             let data: Rumble = msg.data.into();
             file.write_fmt(format_args!("\n\t\t\tRumble Type: {:?}", data.rumble_type));
             file.write_fmt(format_args!("\n\t\t\tScale: {}", data.scale));
-            file.write_fmt(format_args!("\n\t\t\tRumble Flags: {:?}", data.rumble_flags));
+            file.write_fmt(format_args!("\n\t\t\tRumble Flags: {}", bitflags_to_string(data.rumble_flags.iter_names())));
         },
         UserMessageType::SayText => {
             let data: SayText = msg.data.into();

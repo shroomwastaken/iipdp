@@ -263,7 +263,7 @@ pub struct SvcCreateStringTable {
     pub user_data_fixed_size: bool,
     pub user_data_size: Option<i32>,
     pub user_data_size_bits: Option<i32>,
-    pub flags: Option<i32>, // doesnt exist on 3420 so this is an Option
+    pub flags: StringTableFlags, // doesnt exist on 3420 so this is an Option
     pub string_data: utils::StringTable, // placeholder for now
 }
 
@@ -283,10 +283,9 @@ impl SvcCreateStringTable {
             user_data_size_bits = Some(reader.read_int(4));
         }
         
-        let mut flags: Option<i32> = None;
-        // this is 2 bits on demo protocol 4 !!! (will do later)
+        let mut flags: StringTableFlags = StringTableFlags::None;
         if data_mgr.network_protocol >= 15 {
-            flags = Some(reader.read_int(1));
+            flags = StringTableFlags::from_bits_truncate(reader.read_int(if data_mgr.demo_protocol == 4 { 2 } else { 1 }));
         }
 
         let string_data: utils::StringTable = utils::StringTable::new(); // placeholder
@@ -303,6 +302,15 @@ impl SvcCreateStringTable {
             flags: flags,
             string_data: string_data,
         }        
+    }
+}
+
+bitflags::bitflags! {
+    #[derive(Debug, Clone)]
+    pub struct StringTableFlags : i32 {
+        const None = 0;
+        const DataCompressed = 1;
+        const DictionaryMaybeEnabled = 1 << 1;
     }
 }
 

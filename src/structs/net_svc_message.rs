@@ -12,7 +12,7 @@ use crate::bitreader::BitReader;
 use crate::structs::net_svc_message::NetSvcMessageTypes as nsmt;
 use crate::structs::net_svc_message::NetSvcMessageDataTypes as nsmdt;
 use crate::structs::netsvc_types as nt;
-use crate::structs::utils::GameEventList;
+use crate::structs::utils::{GameEventList, bitflags_to_string};
 use crate::structs::data_manager::DataManager;
 use crate::structs::user_message::write_usermsg_data_to_file;
 
@@ -628,7 +628,9 @@ pub fn write_msg_data_to_file(file: &mut File, messages: Vec<NetSvcMessage>, dat
                 file.write_fmt(format_args!("\n\t\tUser Data Fixed Size: {}", msg_data.user_data_fixed_size));
                 file.write_fmt(format_args!("\n\t\tUser Data Size: {}", msg_data.user_data_size.map(|i| i.to_string()).unwrap_or_else(|| {"Null".to_string()})));
                 file.write_fmt(format_args!("\n\t\tUser Data Size Bits: {}", msg_data.user_data_size_bits.map(|i| i.to_string()).unwrap_or_else(|| {"Null".to_string()})));
-                file.write_fmt(format_args!("\n\t\tFlags: {}", msg_data.flags.map(|i| i.to_string()).unwrap_or_else(|| {"Null".to_string()})));
+                if data_mgr.network_protocol >= 15 {
+                    file.write_fmt(format_args!("\n\t\tFlags: {}", bitflags_to_string(msg_data.flags.iter_names())));
+                }
                 file.write_all("\n\t\tNO MORE DATA AVAILABLE (yet)".as_bytes());
             },
             nsmt::SvcUpdateStringTable => {
