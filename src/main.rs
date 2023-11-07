@@ -36,12 +36,11 @@ fn main() {
 
     if path.is_file() {
         if path.extension().unwrap_or_else(|| {OsStr::new("nope")}) == "dem" {
-            let mut main_reader: BitReader = BitReader { contents: fs::read(&args[1]).unwrap_or_else(|err| {
+            let mut main_reader: BitReader = BitReader::new(fs::read(&args[1]).unwrap_or_else(|err| {
                 println!(r#"Demo file reading failed because of: {} ¯\_(ツ)_/¯"#, err);
                 io::stdin().read_line(&mut String::new()).unwrap();
                 exit(1);
-            }), cur_bit_index: 0 };
-        
+            }));
             println!("Parsing...\n");
             let start_time = Instant::now();
         
@@ -91,11 +90,11 @@ fn main() {
             if file.path().extension().unwrap_or_else(|| {OsStr::new("nope")}) == "dem" {
                 println!("\n\nFile Name: {:?}", file.file_name());
                 
-                let mut main_reader: BitReader = BitReader { contents: fs::read(file.path()).unwrap_or_else(|err| {
+                let mut main_reader: BitReader = BitReader::new(fs::read(&args[1]).unwrap_or_else(|err| {
                     println!(r#"Demo file reading failed because of: {} ¯\_(ツ)_/¯"#, err);
                     io::stdin().read_line(&mut String::new()).unwrap();
                     exit(1);
-                }), cur_bit_index: 0 };
+                }));
             
                 println!("Parsing...\n");
                 let start_time = Instant::now();

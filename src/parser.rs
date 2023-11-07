@@ -84,7 +84,7 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
         PacketType::DataTables => {
             let mut data = DataTables::new();
             data.size = reader.read_int(32);
-            let index_before_parsing = reader.cur_bit_index;
+            let index_before_parsing = reader.current;
             
             while reader.read_bool() {
                 let table = SendTable::parse(reader, demo_data_mgr);
@@ -107,7 +107,8 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
             }
             data.send_table_count = data.send_tables.len() as i32;
 
-            reader.cur_bit_index = index_before_parsing + data.size * 8;
+            reader.current = index_before_parsing + (data.size * 8) as usize;
+            reader.fetch();
 
             packet_data = PacketDataType::DataTables(data);
         },
@@ -117,7 +118,7 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
         PacketType::StringTables => {
             let mut data = StringTables::new();
             data.size = reader.read_int(32);
-            let index_before_parsing = reader.cur_bit_index;
+            let index_before_parsing = reader.current;
 
             data.table_count = reader.read_int(8);
 
@@ -125,7 +126,8 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
                 data.tables.push(StringTable::parse(reader));
             }
             
-            reader.cur_bit_index = index_before_parsing + (data.size * 8);
+            reader.current = index_before_parsing + (data.size * 8) as usize;
+            reader.fetch();
             packet_data = PacketDataType::StringTables(data);
         },
         PacketType::SyncTick => {
