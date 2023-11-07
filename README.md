@@ -53,3 +53,7 @@ Everything else:
     * Added Stringtables packet parsing and dumping
 - v0.2.6:
     * Added time adjustment, now this parser can actually time runs properly
+- v0.2.7:
+    * Added Datatables packet parsing and dumping
+    * Prettier flag dumping
+    * Made it go vroooooooom (very fast) (again)
