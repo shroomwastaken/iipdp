@@ -453,9 +453,9 @@ impl NetSvcMessage {
 
 pub fn parse(reader: &mut BitReader, demo_data_mgr: &mut DataManager, size: i32) -> Vec<NetSvcMessage> {
     let mut messages: Vec<NetSvcMessage> = Vec::new();
-    let start_index = reader.cur_bit_index;
+    let start_index = reader.current;
 
-    while ((start_index + size * 8) - reader.cur_bit_index) > 6 {
+    while ((start_index + (size * 8) as usize) - reader.current) > 6 {
         let mut cur_message: NetSvcMessage = NetSvcMessage::new();
 
         let msg_type = reader.read_int(demo_data_mgr.net_svc_type_bits);

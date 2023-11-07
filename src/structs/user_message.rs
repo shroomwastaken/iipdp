@@ -275,7 +275,7 @@ impl HudMsg {
     pub fn parse(reader: &mut BitReader) -> Self {
         let channel = HudChannel::from_i32(reader.read_int(8) % 6).unwrap();
         let mut msg_info: Option<HudMsgInfo> = None;
-        if reader.contents.len() * 8 - reader.cur_bit_index as usize >= 148 {
+        if reader.bit_size - reader.current as usize >= 148 {
             msg_info = Some(HudMsgInfo::parse(reader));
         }
 
