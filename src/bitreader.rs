@@ -122,7 +122,7 @@ impl BitReader {
 
     // same as read_int function but float :0
     pub fn read_float(&mut self, amount: i32) -> f32 {
-        return f32::from_le_bytes((self.read_bits(amount) as u32).to_le_bytes());
+        return (f32::from_le_bytes((self.read_bits(amount) as u32).to_le_bytes()) * 1000.0).round() / 1000.0;
     }
 
     // read ascii string that has a determined length
