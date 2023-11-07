@@ -5,6 +5,7 @@ use crate::bitreader::BitReader;
 // dont know what the difference is between view angles here and in cmdinfo
 // all of the values in UserCmdInfo are Optional, meaning that the value exists only if the bit before its supposed value is 1; 
 
+#[derive(Debug)]
 pub struct UserCmdInfo {
     pub command_number: Option<i32>,
     pub tick_count: Option<i32>,

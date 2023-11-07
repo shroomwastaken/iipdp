@@ -16,7 +16,7 @@ use crate::structs::utils::{GameEventList, bitflags_to_string};
 use crate::structs::data_manager::DataManager;
 use crate::structs::user_message::write_usermsg_data_to_file;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum NetSvcMessageDataTypes {
     Unknown,
     NetNop(NetNop),
@@ -356,7 +356,7 @@ impl Into<SvcVoiceInit> for NetSvcMessageDataTypes {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum NetSvcMessageTypes {
     Unknown,
     NetNop,
@@ -439,6 +439,7 @@ impl NetSvcMessageTypes {
     }
 }
 
+#[derive(Debug)]
 pub struct NetSvcMessage {
     pub msg_type: NetSvcMessageTypes,
     pub data: NetSvcMessageDataTypes,

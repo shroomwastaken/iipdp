@@ -5,6 +5,7 @@ use crate::bitreader::BitReader;
 // there are MSSC amount of these in every Packet packet
 // MSSC being MaxSplitScreenClients, which is 1 for p1, 2 for p2 and 4(?) for l4d games
 
+#[derive(Debug)]
 pub struct CmdInfo {
     pub flags: i32,
     pub view_origin: Vec<f32>,

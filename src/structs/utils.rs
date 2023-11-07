@@ -4,7 +4,7 @@ use crate::bitreader::BitReader;
 
 // used a bunch in usermessages
 // dont know what these really are
-#[derive(PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct EHandle {
     pub val: i32,
 }
@@ -27,7 +27,7 @@ impl fmt::Display for EHandle {
 
 // for NetSetConVar net/svc message
 // this doesnt need to be a struct but i like it being a struct
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct ConVar {
     pub convar_name: String,
     pub convar_value: String,
@@ -40,7 +40,7 @@ impl ConVar {
 }
 
 // for SvcClassInfo
-#[derive(Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ServerClass {
     pub datatable_id: i32,
     pub class_name: String,
@@ -54,7 +54,7 @@ impl ServerClass {
 }
 
 // placeholders for now
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct StringTable;
 
 impl StringTable {
@@ -63,7 +63,7 @@ impl StringTable {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct VoiceData;
 
 impl VoiceData {
@@ -72,10 +72,10 @@ impl VoiceData {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SoundInfo;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SplitScreenData;
 
 impl SplitScreenData {
@@ -84,7 +84,7 @@ impl SplitScreenData {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct EntityMessageData;
 
 impl EntityMessageData {
@@ -93,7 +93,7 @@ impl EntityMessageData {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct PacketEntitiesData;
 
 impl PacketEntitiesData {
@@ -102,7 +102,7 @@ impl PacketEntitiesData {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct TempEntitiesData;
 
 impl TempEntitiesData {
@@ -111,7 +111,7 @@ impl TempEntitiesData {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct MenuData;
 
 impl MenuData {
@@ -120,7 +120,7 @@ impl MenuData {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct CmdKeyValuesData;
 
 impl CmdKeyValuesData {
@@ -129,7 +129,7 @@ impl CmdKeyValuesData {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct PaintmapData;
 
 impl PaintmapData {
@@ -152,7 +152,7 @@ you then look at the values that game event is supposed to have ("keys" field in
 and parse the specified values, populating the "keys" field of the GameEvent struct
 */
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum GameEventKeyTypes {
     None,
     String(String),
@@ -179,7 +179,7 @@ impl GameEventKeyTypes {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct GameEvent {
     pub descriptor: GameEventDescriptor,
     pub keys: HashMap<String, GameEventKeyTypes> // keys = {"name of value" : value as enum}
@@ -191,7 +191,7 @@ impl GameEvent {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct GameEventDescriptor {
     pub event_id: i32,
     pub name: String,
@@ -235,7 +235,7 @@ impl GameEventList {
 // new and add_vec3 from https://github.com/lopossumi/Rust-Vectors
 // everything else from me
 // basically just a vector3 of floats which you can add with other vectors
-#[derive(PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Vec3 {
     pub x: f32,
     pub y: f32,

@@ -5,6 +5,7 @@ use std::fs::File;
 use std::io::Write;
 use crate::structs::utils::bitflags_to_string;
 
+#[derive(Debug)]
 pub struct SendTable {
     pub needs_decoder: bool,
     pub name: String,
@@ -32,6 +33,7 @@ impl SendTable {
     }
 }
 
+#[derive(Debug)]
 pub struct SendTableProp {
     pub send_prop_type: SendPropType,
     pub name: String,

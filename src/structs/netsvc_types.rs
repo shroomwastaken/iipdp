@@ -9,10 +9,10 @@ this has all of the parsing for net/svc message types
 */
 
 // contains no data
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct NetNop;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct NetDisconnect {
     pub text: String,
 }
@@ -23,7 +23,7 @@ impl NetDisconnect {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct NetFile {
     pub transfer_id: i32,
     pub filename: String,
@@ -40,7 +40,7 @@ impl NetFile {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct NetSplitScreenUser {
     pub unknown: bool,
 }
@@ -53,7 +53,7 @@ impl NetSplitScreenUser {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct NetTick {
     pub tick: i32,
     pub host_frame_time: i32,
@@ -70,7 +70,7 @@ impl NetTick {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct NetStringCmd {
     pub command: String,
 }
@@ -81,7 +81,7 @@ impl NetStringCmd {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct NetSetConVar {
     pub length: i32,
     pub convars: Vec<utils::ConVar>,
@@ -109,7 +109,7 @@ impl NetSetConVar {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct NetSignonState {
     pub signon_state: i32,
     pub spawn_count: i32,
@@ -126,7 +126,7 @@ impl NetSignonState {
 }
 
 // most important message
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcServerInfo {
     pub protocol: i32,
     pub server_count: i32,
@@ -183,7 +183,7 @@ impl SvcServerInfo {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcSendTable {
     pub needs_decoder: bool,
     pub length: i32,
@@ -202,7 +202,7 @@ impl SvcSendTable {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcClassInfo {
     pub length: i32,
     pub create_on_client: bool,
@@ -237,7 +237,7 @@ impl SvcClassInfo {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcSetPause {
     pub paused: bool,
 }
@@ -254,7 +254,7 @@ impl SvcSetPause {
 // they pretty much replicate the stringtables packet
 // so its a mystery why they exist
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcCreateStringTable {
     pub name: String,
     pub max_entries: i32,
@@ -314,7 +314,7 @@ bitflags::bitflags! {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcUpdateStringTable {
     pub table_id: i32,
     pub num_changed_entries: i32,
@@ -339,7 +339,7 @@ impl SvcUpdateStringTable {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcVoiceInit {
     pub codec: String,
     pub quality: i32,
@@ -361,7 +361,7 @@ impl SvcVoiceInit {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcVoiceData {
     pub client: i32,
     pub proximity: i32,
@@ -395,7 +395,7 @@ impl SvcVoiceData {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcPrint {
     pub message: String,
 }
@@ -408,7 +408,7 @@ impl SvcPrint {
 
 // apparently this messages data parsing made uncrafted want to cry
 // oh boy am i looking forward to implementing that
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcSounds {
     pub reliable_sound: bool,
     pub num_sounds: i32,
@@ -438,7 +438,7 @@ impl SvcSounds {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcSetView {
     pub entity_index: i32,
 }
@@ -449,7 +449,7 @@ impl SvcSetView {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcFixAngle {
     pub relative: bool,
     pub angle: Vec<f32>,
@@ -469,7 +469,7 @@ impl SvcFixAngle {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcCrosshairAngle {
     pub angle: Vec<f32>,
 }
@@ -486,7 +486,7 @@ impl SvcCrosshairAngle {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcBspDecal {
     pub pos: Vec<Option<f32>>,
     pub decal_texture_index: i32,
@@ -515,7 +515,7 @@ impl SvcBspDecal {
 
 // honestly dont know why i implemented this
 // this is p2 only, i dont even have any other p2 stuff
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcSplitScreen {
     pub s_type: i32,
     pub length: i32,
@@ -536,7 +536,7 @@ impl SvcSplitScreen {
 
 // i hate this message in ints entirety
 // see user_message.rs (yup that 1300 line monstrosity)
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcUserMessage {
     pub length: i32,
     pub data: UserMessage,
@@ -558,7 +558,7 @@ impl SvcUserMessage {
 // this, and all other messages that have "entity" in their names
 // have not been properly implemented yet, because i havent done
 // any datatable stuff. will be done once i do that
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcEntityMessage {
     pub entity_index: i32,
     pub class_id: i32,
@@ -583,7 +583,7 @@ impl SvcEntityMessage {
 // look at descriptor, find the corresponding game event (using the id stored in the descriptor)
 // look at keys that are supposed to be stored (i.e. {"userid": int32})
 // parse the keys accordingly and populate the keys field of GameEvent struct
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcGameEvent {
     pub length: i32,
     pub data: utils::GameEvent,
@@ -619,7 +619,7 @@ impl SvcGameEvent {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcPacketEntities {
     pub max_entries: i32,
     pub is_delta: bool,
@@ -659,7 +659,7 @@ impl SvcPacketEntities {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcTempEntities {
     pub num_entries: i32,
     pub length: i32,
@@ -676,7 +676,7 @@ impl SvcTempEntities {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcPrefetch {
     pub sound_index: i32,
 }
@@ -695,7 +695,7 @@ impl SvcPrefetch {
 }
 
 // no clue what this is
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcMenu {
     pub menu_type: i32,
     pub length: i32,
@@ -711,7 +711,7 @@ impl SvcMenu {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcGameEventList {
     pub events: i32,
     pub length: i32,
@@ -735,7 +735,7 @@ impl SvcGameEventList {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcGetCvarValue {
     pub cookie: String,
     pub cvar_name: String,
@@ -750,7 +750,7 @@ impl SvcGetCvarValue {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcCmdKeyValues {
     pub length: i32,
     pub data: utils::CmdKeyValuesData,
@@ -766,7 +766,7 @@ impl SvcCmdKeyValues {
     }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct SvcPaintmapData {
     pub length: i32,
     pub data: utils::PaintmapData
