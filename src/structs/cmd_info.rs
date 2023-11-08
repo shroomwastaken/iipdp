@@ -7,7 +7,7 @@ use crate::bitreader::BitReader;
 
 #[derive(Debug)]
 pub struct CmdInfo {
-    pub flags: i32,
+    pub flags: InterpFlags,
     pub view_origin: Vec<f32>,
     pub view_angles: Vec<f32>,
     pub local_view_angles: Vec<f32>,
@@ -19,7 +19,7 @@ pub struct CmdInfo {
 impl CmdInfo {
     pub fn new() -> Self {
         Self {
-            flags: 0,
+            flags: InterpFlags::None,
             view_origin: vec![],
             view_angles: vec![],
             local_view_angles: vec![],
@@ -32,7 +32,7 @@ impl CmdInfo {
     pub fn parse(reader: &mut BitReader) -> Self {
         let mut cmd_info: CmdInfo = CmdInfo::new();
     
-        cmd_info.flags = reader.read_int(32);
+        cmd_info.flags = InterpFlags::from_bits_truncate(reader.read_int(32));
     
         for _j in 0..3 {
             cmd_info.view_origin.push(reader.read_float(32));
@@ -59,5 +59,15 @@ impl CmdInfo {
         }
     
         return cmd_info;
+    }
+}
+
+bitflags::bitflags! {
+    #[derive(Debug)]
+    pub struct InterpFlags : i32 {
+        const None = 0;
+        const UseOrigin2 = 1;
+        const UseAngles2 = 1 << 1;
+        const NoInterp = 1 << 2; // don't interpolate between this and last view
     }
 }

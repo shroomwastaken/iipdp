@@ -5,6 +5,7 @@ use crate::structs::cmd_info::CmdInfo;
 use crate::structs::user_cmd_info::UserCmdInfo;
 use crate::structs::stringtable::write_stringtables_data_to_file;
 use crate::structs::send_table::write_send_table_data_to_file;
+use crate::structs::utils::bitflags_to_string;
 use std::path::Path;
 use std::fs;
 use std::io::Write;
@@ -104,7 +105,7 @@ pub fn dump_file(file_path: &String, demo: Demo) {
             file.write_all("\tCmdInfo:\n".as_bytes());
             let cmd_info: CmdInfo = packet_data.cmd_info;
 
-            file.write_fmt(format_args!("\t\tFlags: {}\n", cmd_info.flags));
+            file.write_fmt(format_args!("\t\tFlags: {}\n", bitflags_to_string(cmd_info.flags.iter_names())));
 
             file.write_all("\t\tViewOrigin: ".as_bytes());
             for i in cmd_info.view_origin {
