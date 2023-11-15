@@ -243,8 +243,8 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
-    pub fn new(x: f32, y: f32, z: f32) -> Vec3 {
-        Vec3 { x, y, z }
+    pub fn new() -> Vec3 {
+        Vec3 { x: 0.0, y: 0.0, z: 0.0 }
     }
 
     pub fn add_vec3(&self, other: Vec3) -> Vec3 {
@@ -266,7 +266,11 @@ impl Vec3 {
 
 impl fmt::Display for Vec3 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "({}, {}, {})", self.x, self.y, self.z)
+        let mut base_str: String = "                                        ".to_string();
+        base_str.replace_range(0..self.x.to_string().len(), &self.x.to_string());
+        base_str.replace_range(10..self.y.to_string().len() + 10, &self.y.to_string());
+        base_str.replace_range(20..self.z.to_string().len() + 20, &self.z.to_string());
+        write!(f, "{}", base_str)
     }
 }
 
