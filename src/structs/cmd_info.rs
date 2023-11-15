@@ -1,4 +1,5 @@
 use crate::bitreader::BitReader;
+use crate::structs::utils::Vec3;
 
 // cmdinfo is present in every Packet packet and contains information about
 // where the player is looking and what their position is
@@ -8,24 +9,24 @@ use crate::bitreader::BitReader;
 #[derive(Debug)]
 pub struct CmdInfo {
     pub flags: InterpFlags,
-    pub view_origin: Vec<f32>,
-    pub view_angles: Vec<f32>,
-    pub local_view_angles: Vec<f32>,
-    pub view_origin2: Vec<f32>,
-    pub view_angles2: Vec<f32>,
-    pub local_view_angles2: Vec<f32>,
+    pub view_origin: Vec3,
+    pub view_angles: Vec3,
+    pub local_view_angles: Vec3,
+    pub view_origin2: Vec3,
+    pub view_angles2: Vec3,
+    pub local_view_angles2: Vec3,
 }
 
 impl CmdInfo {
     pub fn new() -> Self {
         Self {
             flags: InterpFlags::None,
-            view_origin: vec![],
-            view_angles: vec![],
-            local_view_angles: vec![],
-            view_origin2: vec![],
-            view_angles2: vec![],
-            local_view_angles2: vec![]
+            view_origin: Vec3::new(),
+            view_angles: Vec3::new(),
+            local_view_angles: Vec3::new(),
+            view_origin2: Vec3::new(),
+            view_angles2: Vec3::new(),
+            local_view_angles2: Vec3::new()
         }
     }
 
@@ -34,29 +35,12 @@ impl CmdInfo {
     
         cmd_info.flags = InterpFlags::from_bits_truncate(reader.read_int(32));
     
-        for _j in 0..3 {
-            cmd_info.view_origin.push(reader.read_float(32));
-        }
-    
-        for _j in 0..3 {
-            cmd_info.view_angles.push(reader.read_float(32));
-        }
-    
-        for _j in 0..3 {
-            cmd_info.local_view_angles.push(reader.read_float(32));
-        }
-    
-        for _j in 0..3 {
-            cmd_info.view_origin2.push(reader.read_float(32));
-        }
-    
-        for _j in 0..3 {
-            cmd_info.view_angles2.push(reader.read_float(32));
-        }
-    
-        for _j in 0..3 {
-            cmd_info.local_view_angles2.push(reader.read_float(32));
-        }
+        cmd_info.view_origin = reader.read_vec3();
+        cmd_info.view_angles = reader.read_vec3();
+        cmd_info.local_view_angles = reader.read_vec3();
+        cmd_info.view_origin2 = reader.read_vec3();
+        cmd_info.view_angles2 = reader.read_vec3();
+        cmd_info.local_view_angles2 = reader.read_vec3();
     
         return cmd_info;
     }
