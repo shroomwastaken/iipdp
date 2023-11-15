@@ -107,41 +107,12 @@ pub fn dump_file(file_path: &String, demo: Demo) {
 
             file.write_fmt(format_args!("\t\tFlags: {}\n", bitflags_to_string(cmd_info.flags.iter_names())));
 
-            file.write_all("\t\tViewOrigin: ".as_bytes());
-            for i in cmd_info.view_origin {
-                file.write_fmt(format_args!("{} ", &i));
-            }
-            file.write_all("\n".as_bytes());
-
-            file.write_all("\t\tViewAngles: ".as_bytes());
-            for i in cmd_info.view_angles {
-                file.write_fmt(format_args!("{} ", &i));
-            }
-            file.write_all("\n".as_bytes());
-
-            file.write_all("\t\tLocalViewAngles: ".as_bytes());
-            for i in cmd_info.local_view_angles {
-                file.write_fmt(format_args!("{} ", &i));
-            }
-            file.write_all("\n".as_bytes());
-
-            file.write_all("\t\tViewOrigin2: ".as_bytes());
-            for i in cmd_info.view_origin2 {
-                file.write_fmt(format_args!("{} ", &i));
-            }
-            file.write_all("\n".as_bytes());
-
-            file.write_all("\t\tViewAngles2: ".as_bytes());
-            for i in cmd_info.view_angles2 {
-                file.write_fmt(format_args!("{} ", &i));
-            }
-            file.write_all("\n".as_bytes());
-
-            file.write_all("\t\tLocalViewAngles2: ".as_bytes());
-            for i in cmd_info.local_view_angles2 {
-                file.write_fmt(format_args!("{} ", &i));
-            }
-            file.write_all("\n".as_bytes());
+            file.write_fmt(format_args!("\t\tViewAngles:        {}\n", cmd_info.view_angles));
+            file.write_fmt(format_args!("\t\tViewOrigin:        {}\n", cmd_info.view_origin));
+            file.write_fmt(format_args!("\t\tLocalViewAngles:   {}\n", cmd_info.local_view_angles));
+            file.write_fmt(format_args!("\t\tViewAngles2:       {}\n", cmd_info.view_angles2));
+            file.write_fmt(format_args!("\t\tViewOrigin2:       {}\n", cmd_info.view_origin2));
+            file.write_fmt(format_args!("\t\tLocalViewAngles2:  {}\n", cmd_info.local_view_angles2));
 
             file.write_fmt(format_args!("\tInSequence: {}\n", packet_data.in_sequence));
             file.write_fmt(format_args!("\tOutSequence: {}\n", packet_data.out_sequence));
