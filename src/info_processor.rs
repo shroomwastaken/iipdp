@@ -148,7 +148,7 @@ pub fn dump_file(file_path: &String, demo: Demo) {
             file.write_fmt(format_args!("{} ", user_cmd_info.side_move.map(|i| {i.to_string()}).unwrap_or_else(|| {"Null".to_string()})));
             file.write_fmt(format_args!("{}\n", user_cmd_info.up_move.map(|i| {i.to_string()}).unwrap_or_else(|| {"Null".to_string()})));
 
-            file.write_fmt(format_args!("\t\tButtons: {}\n", user_cmd_info.buttons.map(|i| {i.to_string()}).unwrap_or_else(|| {"Null".to_string()})));
+            file.write_fmt(format_args!("\t\tButtons: {}\n", bitflags_to_string(user_cmd_info.buttons.iter_names())));
             file.write_fmt(format_args!("\t\tImpulse: {}\n", user_cmd_info.impulse.map(|i| {i.to_string()}).unwrap_or_else(|| {"Null".to_string()}))); 
 
             file.write_fmt(format_args!("\t\tWeapon Select, Subtype: {}, {}\n", user_cmd_info.weapon_select.map(|i| {i.to_string()}).unwrap_or_else(|| {"Null".to_string()}), 
