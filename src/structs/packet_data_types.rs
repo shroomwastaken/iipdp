@@ -84,7 +84,7 @@ pub struct Stop;
 // this is a really important packet
 // only appears once and has data for every string table
 // for info about stringtable structure see stringtable.rs
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct StringTables {
     pub size: i32,
     pub table_count: i32,

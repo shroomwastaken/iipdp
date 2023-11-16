@@ -2,6 +2,7 @@ use crate::structs::utils::{GameEventList, ServerClass};
 use crate::structs::demo_header::DemoHeader;
 use crate::structs::user_message::UserMessageType;
 use crate::structs::send_table::SendPropType;
+use crate::structs::stringtable::StringTable;
 
 // will be used more later in development
 // for now this stores information vital for parsing the demo
@@ -29,6 +30,7 @@ pub struct DataManager {
     pub net_svc_type_bits: i32,
     pub adj_start_tick: i32,
     pub adj_end_tick: i32,
+    pub stringtables: Vec<StringTable>,
     pub server_class_info: Vec<ServerClass>,
     pub send_prop_amount_of_bits_to_get_num_bits: i32, // hehehe
     pub send_prop_type_list: Vec<SendPropType>,
@@ -48,6 +50,7 @@ impl DataManager {
             net_svc_type_bits: 6, // default for everything other than 3420 iirc
             adj_start_tick: 0,
             adj_end_tick: 0,
+            stringtables: Vec::new(),
             server_class_info: Vec::new(),
             send_prop_amount_of_bits_to_get_num_bits: 0,
             send_prop_type_list: Vec::new(),

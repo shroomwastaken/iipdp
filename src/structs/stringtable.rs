@@ -11,7 +11,7 @@ use crate::structs::utils::bitflags_to_string;
 // theyre referenced by different net svc messages which is why it's good to store them somewhere for later use
 // every stringtable has x amount of entries and y amount of classes
 // theres different types of stringtables (all can be found here just scroll)
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct StringTable {
     pub name: String,
     pub entry_count: i32,
@@ -47,7 +47,7 @@ impl StringTable {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct StringTableEntry {
     pub name: String,
     pub entry_data: StringTableEntryDataTypes
@@ -83,7 +83,7 @@ impl StringTableEntry {
 }
 
 // all of the currently implemented data types
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum StringTableEntryDataTypes {
     None,
     Unknown,
@@ -94,7 +94,7 @@ pub enum StringTableEntryDataTypes {
     PrecacheData(PrecacheData),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct StringTableClass {
     pub name: String,
     pub data: String,
@@ -118,7 +118,7 @@ impl StringTableClass {
 
 // only appears once in p1, dont know about other games but it would make sense if
 // it were to appear more times the more players there were in a multiplayer game
-#[derive(Debug,PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct PlayerInfo {
     // steam id stuff only exists on demo protocol 4 so im not gonna bother yet
     pub name: String, // scoreboard info
@@ -162,7 +162,7 @@ impl PlayerInfo {
 }
 
 // no clue what this does tbh
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct QueryPort {
     pub port: i32,
 }
@@ -177,7 +177,7 @@ impl QueryPort {
 pub struct InstanceBaseline; // not until i do datatable stuff
 
 // just strings
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct StringEntryData {
     pub str: String,
 }
@@ -189,7 +189,7 @@ impl StringEntryData {
 }
 
 // this containts the flicker patterns of lights according to uncrafted
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct LightStyle {
     pub values: Vec<u8>,
 }
@@ -206,7 +206,7 @@ impl LightStyle {
 }
 
 // tells the engine what assets to load iirc
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct PrecacheData {
     pub flags: PrecacheFlags,
 }
@@ -218,7 +218,7 @@ impl PrecacheData {
 }
 
 bitflags! {
-    #[derive(Debug, PartialEq)]
+    #[derive(Debug, PartialEq, Clone)]
     pub struct PrecacheFlags: i32 {
         const None = 0;
         const FatalIfMissing = 1;

@@ -145,6 +145,7 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
             } else {
                 reader.skip(data.size * 8);
             }
+            demo_data_mgr.stringtables = data.clone().tables;
             packet_data = PacketDataType::StringTables(data);
         },
         PacketType::SyncTick => {
