@@ -272,7 +272,7 @@ impl SvcCreateStringTable {
         let name = reader.read_ascii_string_nulled();
         let max_entries = reader.read_int(16);
         let num_entries = reader.read_int(((max_entries as f32).log2() as i32) + 1);
-        let length: i32 = reader.read_int(20);
+        let length: i32 = if data_mgr.game == Game::PORTAL_1_1910503 { reader.read_var_int32() } else { reader.read_int(20) };
         let user_data_fixed_size = reader.read_bool();
 
         let mut user_data_size: Option<i32> = None;
@@ -667,9 +667,9 @@ pub struct SvcTempEntities {
 }
 
 impl SvcTempEntities {
-    pub fn parse(reader: &mut BitReader) -> Self {
+    pub fn parse(reader: &mut BitReader, data_mgr: &DataManager) -> Self {
         let num_entires = reader.read_int(8);
-        let length = reader.read_int(17);
+        let length = if data_mgr.game == Game::PORTAL_1_1910503 { reader.read_var_int32() } else { reader.read_int(17) };
         let data: utils::TempEntitiesData = utils::TempEntitiesData::new();
         reader.skip(length as i32);
         Self { num_entries: num_entires, length: length, data: data }

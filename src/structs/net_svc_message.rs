@@ -493,7 +493,7 @@ pub fn parse(reader: &mut BitReader, demo_data_mgr: &mut DataManager, size: i32)
             nsmt::SvcSetView => cur_message.data = nsmdt::SvcSetView(nt::SvcSetView::parse(reader)),
             nsmt::SvcSounds => cur_message.data = nsmdt::SvcSounds(nt::SvcSounds::parse(reader)),
             nsmt::SvcSplitScreen => cur_message.data = nsmdt::SvcSplitScreen(nt::SvcSplitScreen::parse(reader)),
-            nsmt::SvcTempEntities => cur_message.data = nsmdt::SvcTempEntities(nt::SvcTempEntities::parse(reader)),
+            nsmt::SvcTempEntities => cur_message.data = nsmdt::SvcTempEntities(nt::SvcTempEntities::parse(reader, demo_data_mgr)),
             nsmt::SvcUpdateStringTable => cur_message.data = nsmdt::SvcUpdateStringTable(nt::SvcUpdateStringTable::parse(reader)),
             nsmt::SvcUserMessage => cur_message.data = nsmdt::SvcUserMessage(nt::SvcUserMessage::parse(reader, demo_data_mgr.user_message_list.clone())),
             nsmt::SvcVoiceData => cur_message.data = nsmdt::SvcVoiceData(nt::SvcVoiceData::parse(reader)),
