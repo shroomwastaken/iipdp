@@ -9,7 +9,7 @@ use crate::structs::packet_data_types::{PP, ConsoleCmd, UserCmd, SyncTick, Strin
 use crate::structs::stringtable::StringTable;
 use crate::structs::user_cmd_info::UserCmdInfo;
 use crate::structs::send_table::SendTable;
-use crate::structs::utils::ServerClass;
+use crate::structs::utils::{ServerClass, check_for_pause};
 
 // all information about the .dem file structure was taken from https://nekz.me/dem/demo.html and UntitledParser
 
@@ -28,7 +28,6 @@ pub fn get_packets(reader: &mut BitReader, demo: &mut Demo) -> Vec<Packet> {
         cur_packet.packet_type = PacketType::from_int(packet_type);
         if cur_packet.packet_type != PacketType::Stop {
             cur_packet.tick = reader.read_int(32);
-
             if cur_packet.tick > 0 {
                 demo.data_manager.last_packet_tick = cur_packet.tick;
             }
@@ -63,10 +62,20 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
             data.out_sequence = reader.read_int(32);
             data.size = reader.read_int(32); // in bytes!!!
 
-            data.messages = parse(&mut reader.split_and_skip(data.size as i32 * 8), demo_data_mgr, data.size);
+            // some optimization
+            // if we are paused and past the point of adjustment and not dumping we skip any data after the size variable to go faster
+            // same thing for every other packet type
+            if !demo_data_mgr.dumping && demo_data_mgr.paused && demo_data_mgr.adj_end_tick != 0 {
+                reader.skip(data.size as i32 * 8);
+            } else {
+                data.messages = parse(&mut reader.split_and_skip(data.size as i32 * 8), demo_data_mgr, data.size);
 
-            if data.messages.iter().find(|m| {m.msg_type == NetSvcMessageTypes::SvcFixAngle}).is_some() && cur_tick != 0 {
-                try_adjust_for_wakeup(&data.messages, cur_tick, demo_data_mgr,);
+                if data.messages.iter().find(|m| {m.msg_type == NetSvcMessageTypes::SvcFixAngle}).is_some() && cur_tick != 0 {
+                    try_adjust_for_wakeup(&data.messages, cur_tick, demo_data_mgr);
+                }
+                if data.messages.iter().find(|m| {m.msg_type == NetSvcMessageTypes::SvcSetPause}).is_some() {
+                    demo_data_mgr.paused = check_for_pause(&data.messages, demo_data_mgr)
+                }    
             }
 
             packet_data = PacketDataType::Packet(data);
@@ -84,31 +93,35 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
         PacketType::DataTables => {
             let mut data = DataTables::new();
             data.size = reader.read_int(32);
-            let index_before_parsing = reader.current;
+            if demo_data_mgr.dumping {
+                let index_before_parsing = reader.current;
             
-            while reader.read_bool() {
-                let table = SendTable::parse(reader, demo_data_mgr);
-                data.send_tables.push(table);
-            }
-
-            data.class_count = reader.read_int(16);
-            for _ in 0..data.class_count {
-                let mut server_class = ServerClass::new();
-                // if we didnt get an SvcClassInfo yet (?)
-                if demo_data_mgr.server_class_info == Vec::new() {
-                    server_class.datatable_id = reader.read_int(16);
-                } else {
-                    server_class.datatable_id = reader.read_int(((demo_data_mgr.server_class_info.len() as f32).log2() + 1f32) as i32);
+                while reader.read_bool() {
+                    let table = SendTable::parse(reader, demo_data_mgr);
+                    data.send_tables.push(table);
                 }
-                server_class.class_name = reader.read_ascii_string_nulled();
-                server_class.data_table_name = reader.read_ascii_string_nulled();
 
-                data.server_classes.push(server_class);
+                data.class_count = reader.read_int(16);
+                for _ in 0..data.class_count {
+                    let mut server_class = ServerClass::new();
+                    // if we didnt get an SvcClassInfo yet (?)
+                    if demo_data_mgr.server_class_info == Vec::new() {
+                        server_class.datatable_id = reader.read_int(16);
+                    } else {
+                        server_class.datatable_id = reader.read_int(((demo_data_mgr.server_class_info.len() as f32).log2() + 1f32) as i32);
+                    }
+                    server_class.class_name = reader.read_ascii_string_nulled();
+                    server_class.data_table_name = reader.read_ascii_string_nulled();
+
+                    data.server_classes.push(server_class);
+                }
+                data.send_table_count = data.send_tables.len() as i32;
+
+                reader.current = index_before_parsing + (data.size * 8) as usize;
+                reader.fetch();
+            } else {
+                reader.skip(data.size * 8);
             }
-            data.send_table_count = data.send_tables.len() as i32;
-
-            reader.current = index_before_parsing + (data.size * 8) as usize;
-            reader.fetch();
 
             packet_data = PacketDataType::DataTables(data);
         },
@@ -118,16 +131,20 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
         PacketType::StringTables => {
             let mut data = StringTables::new();
             data.size = reader.read_int(32);
-            let index_before_parsing = reader.current;
+            if demo_data_mgr.dumping {
+                let index_before_parsing = reader.current;
 
-            data.table_count = reader.read_int(8);
+                data.table_count = reader.read_int(8);
 
-            for _ in 0..data.table_count {
-                data.tables.push(StringTable::parse(reader));
+                for _ in 0..data.table_count {
+                    data.tables.push(StringTable::parse(reader));
+                }
+                
+                reader.current = index_before_parsing + (data.size * 8) as usize;
+                reader.fetch();
+            } else {
+                reader.skip(data.size * 8);
             }
-            
-            reader.current = index_before_parsing + (data.size * 8) as usize;
-            reader.fetch();
             packet_data = PacketDataType::StringTables(data);
         },
         PacketType::SyncTick => {
@@ -141,7 +158,11 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
 
             data.cmd = reader.read_int(32);
             data.size = reader.read_int(32);
-            data.data = UserCmdInfo::parse(&mut reader.split_and_skip((data.size * 8) as i32));
+            if demo_data_mgr.dumping {
+                data.data = UserCmdInfo::parse(&mut reader.split_and_skip((data.size * 8) as i32));
+            } else {
+                reader.skip(data.size * 8);
+            }
 
             packet_data = PacketDataType::UserCmd(data);
         }

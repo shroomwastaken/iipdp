@@ -52,6 +52,8 @@ fn main() {
             demo.header = header;
         
             demo.data_manager.get_info_from_header(&demo.header);
+
+            demo.data_manager.dumping = dumping;
         
             let packets: Vec<Packet> = parser::get_packets(&mut main_reader, &mut demo);
         
@@ -107,7 +109,9 @@ fn main() {
                 demo.header = header;
             
                 demo.data_manager.get_info_from_header(&demo.header);
-            
+
+                demo.data_manager.dumping = dumping;
+
                 let packets: Vec<Packet> = parser::get_packets(&mut main_reader, &mut demo);
             
                 demo.packets = packets;

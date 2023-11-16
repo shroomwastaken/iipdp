@@ -1,6 +1,10 @@
 use std::collections::HashMap;
 use core::fmt;
 use crate::bitreader::BitReader;
+use crate::structs::net_svc_message::{NetSvcMessage, NetSvcMessageTypes};
+use crate::structs::data_manager::DataManager;
+
+use super::netsvc_types::SvcSetPause;
 
 // used a bunch in usermessages
 // dont know what these really are
@@ -272,6 +276,13 @@ impl fmt::Display for Vec3 {
         base_str.replace_range(20..self.z.to_string().len() + 20, &self.z.to_string());
         write!(f, "{}", base_str)
     }
+}
+
+// theres a better way to go about this whole pause checking thing probably
+// too bad
+pub fn check_for_pause(messages: &Vec<NetSvcMessage>, data_mgr: &mut DataManager) -> bool {
+    let data: SvcSetPause = messages.iter().find(|m| {m.msg_type == NetSvcMessageTypes::SvcSetPause}).unwrap().data.clone().into();
+    return data.paused;
 }
 
 // below is something i shouldve done a long time ago

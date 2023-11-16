@@ -31,7 +31,9 @@ pub struct DataManager {
     pub adj_end_tick: i32,
     pub server_class_info: Vec<ServerClass>,
     pub send_prop_amount_of_bits_to_get_num_bits: i32, // hehehe
-    pub send_prop_type_list: Vec<SendPropType>
+    pub send_prop_type_list: Vec<SendPropType>,
+    pub paused: bool,
+    pub dumping: bool,
 }
 
 impl DataManager {
@@ -49,6 +51,8 @@ impl DataManager {
             server_class_info: Vec::new(),
             send_prop_amount_of_bits_to_get_num_bits: 0,
             send_prop_type_list: Vec::new(),
+            paused: false,
+            dumping: false,
         }
     }
 
