@@ -115,6 +115,19 @@ impl BitReader {
         return i32::from_le_bytes((self.read_bits(amount) as u32).to_le_bytes());
     }
 
+    // i dislike steampipe
+    // thanks jukspa :)
+    pub fn read_var_int32(&mut self) -> i32 {
+        let mut res: i32 = 0;
+
+        for i in 0..5 {
+            let b: i32 = self.read_int(8);
+            res |= (b & 0x7F) << (7 * i);
+            if (b & 0x80) == 0 { break; }
+        }
+        return res as i32;
+    }
+
     // used once, dont remember where
     pub fn read_uint_64(&mut self) -> u64 {
         return u64::from_le_bytes(self.read_bits(64).to_le_bytes());
