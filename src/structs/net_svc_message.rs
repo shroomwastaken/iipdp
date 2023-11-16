@@ -736,6 +736,7 @@ pub fn write_msg_data_to_file(file: &mut File, messages: Vec<NetSvcMessage>, dat
                 let msg_data: nt::SvcPrefetch = message.data.into();
                 file.write_all("\n\tMessage: SvcPrefetch".as_bytes());
                 file.write_fmt(format_args!("\n\t\tSound Index: {}", msg_data.sound_index));
+                file.write_fmt(format_args!("\n\t\tSound Name: {}", msg_data.sound_name));
             },
             nsmt::SvcMenu => {
                 let msg_data: nt::SvcMenu = message.data.into();

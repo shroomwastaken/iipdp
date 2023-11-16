@@ -679,18 +679,24 @@ impl SvcTempEntities {
 #[derive(Debug, Clone)]
 pub struct SvcPrefetch {
     pub sound_index: i32,
+    pub sound_name: String
 }
 
 impl SvcPrefetch {
     pub fn parse(reader: &mut BitReader, data_mgr: &DataManager) -> Self {
-        let sound_index: i32;
-        if data_mgr.network_protocol == 24 {
-            sound_index = reader.read_int(14);
-        } else {
-            sound_index = reader.read_int(13);
+        let sound_index: i32 = reader.read_int(if data_mgr.network_protocol == 24 { 14 } else { 13 });;
+        
+        let mut sound_name: String = "None".to_string();
+
+        // todo: make this better cause this is just awful lmao
+        for i in &data_mgr.stringtables {
+            if i.name == "soundprecache".to_string() {
+                sound_name = i.table_entries[sound_index as usize].clone().name;
+                break;
+            }
         }
 
-        Self { sound_index: sound_index }
+        Self { sound_index: sound_index, sound_name: sound_name }
     }
 }
 
