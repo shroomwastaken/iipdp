@@ -115,6 +115,14 @@ impl BitReader {
         return i32::from_le_bytes((self.read_bits(amount) as u32).to_le_bytes());
     }
 
+    pub fn read_signed_int(&mut self, amount: i32) -> i32 {
+        let mut res = self.read_bits(amount) as i32;
+        if (res & (1 << (amount - 1))) != 0 {
+            res |= i32::MAX << amount;
+        }
+        return res;
+    }
+
     // i dislike steampipe
     // thanks jukspa :)
     pub fn read_var_int32(&mut self) -> i32 {
@@ -223,4 +231,6 @@ impl BitReader {
     pub fn read_int_if_exists(&mut self, amount: i32) -> Option<i32> { return if self.read_bool() { Some(self.read_int(amount)) } else { None } }
 
     pub fn read_float_if_exists(&mut self, amount: i32) -> Option<f32> { return if self.read_bool() { Some(self.read_float(amount)) } else { None } }
+
+    pub fn read_signed_int_if_exists(&mut self, amount: i32) -> Option<i32> { return if self.read_bool() { Some(self.read_signed_int(amount)) } else { None }}
 }
