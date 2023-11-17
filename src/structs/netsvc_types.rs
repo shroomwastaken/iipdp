@@ -478,8 +478,8 @@ impl SvcCrosshairAngle {
     pub fn parse(reader: &mut BitReader) -> Self {
         let mut angle_vec: Vec<f32> = Vec::new();
 
-        for _ in 0..2 {
-            angle_vec.push(reader.read_float(16));
+        for _ in 0..3 {
+            angle_vec.push(reader.read_bit_angle(16));
         }
 
         Self { angle: angle_vec }
