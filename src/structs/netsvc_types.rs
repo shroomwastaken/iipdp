@@ -684,7 +684,7 @@ pub struct SvcPrefetch {
 
 impl SvcPrefetch {
     pub fn parse(reader: &mut BitReader, data_mgr: &DataManager) -> Self {
-        let sound_index: i32 = reader.read_int(if data_mgr.network_protocol == 24 { 14 } else { 13 });;
+        let sound_index: i32 = reader.read_int(if data_mgr.network_protocol == 24 { 14 } else { 13 });
         
         let mut sound_name: String = "None".to_string();
 
