@@ -220,6 +220,11 @@ impl BitReader {
         return coords_vec;
     }
 
+    // i should really ask uncrafted about this
+    pub fn read_bit_angle(&mut self, amount: i32) -> f32 {
+        return self.read_int(amount) as f32 * (360.0 / (1 << amount) as f32)
+    }
+
     // ehandle reader, no clue what ehandles really are yet, ask uncrafted
     // for more info on the Ehandle type go to utils.rs
     pub fn read_ehandle(&mut self) -> EHandle { return EHandle { val: self.read_int(32)} }
