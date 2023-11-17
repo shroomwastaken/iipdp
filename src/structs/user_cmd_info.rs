@@ -62,8 +62,8 @@ impl UserCmdInfo {
 
         if weapon_select != None { weapon_subtype = Some(reader.read_int(6)) }
 
-        let mouse_dx: Option<i32> = reader.read_int_if_exists(16);
-        let mouse_dy: Option<i32> = reader.read_int_if_exists(16);
+        let mouse_dx: Option<i32> = reader.read_signed_int_if_exists(16);
+        let mouse_dy: Option<i32> = reader.read_signed_int_if_exists(16);
 
         Self {
             command_number: command_number,
