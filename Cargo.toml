@@ -6,3 +6,8 @@ edition = "2021"
 [dependencies]
 bitflags = "2.4.0"
 enum_primitive = "0.1.1"
+
+[profile.release]
+opt-level = "z"  # Optimize for size.
+lto = "fat"
+codegen-units = 1
