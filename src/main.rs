@@ -6,6 +6,7 @@ use std::process::exit;
 use std::time::Instant;
 use std::ffi::OsStr;
 
+use args::Args;
 use structs::demo::Demo;
 use structs::demo_header::DemoHeader;
 use structs::packet::Packet;
@@ -20,23 +21,17 @@ mod bitreader;
 mod info_processor;
 mod parser;
 mod adjust_time;
+mod args;
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    let args: Args = Args::parse(env::args().collect());
 
-    if args.len() == 1 {
-        println!("IIPDP v0.2.7 made by shroom\nUsage: iipdp <demo file> [-dump]");
-        println!("-dump will output all of the available demo file information into a text file in the working directory");
-        io::stdin().read_line(&mut String::new()).unwrap();
-        return;
-    }
-
-    let path: &Path = Path::new(&args[1]);
-    let dumping: bool = args.len() == 3 && args[2] == "-dump";
+    let path: &Path = Path::new(&args.demo_name);
+    let dumping: bool = args.dump;
 
     if path.is_file() {
         if path.extension().unwrap_or_else(|| {OsStr::new("nope")}) == "dem" {
-            let mut main_reader: BitReader = BitReader::new(fs::read(&args[1]).unwrap_or_else(|err| {
+            let mut main_reader: BitReader = BitReader::new(fs::read(args.demo_name.clone()).unwrap_or_else(|err| {
                 println!(r#"Demo file reading failed because of: {} ¯\_(ツ)_/¯"#, err);
                 io::stdin().read_line(&mut String::new()).unwrap();
                 exit(1);
@@ -69,7 +64,7 @@ fn main() {
                 info_processor::print_header_info(demo);
                 println!("\nParsed in {:?}", Instant::now().duration_since(start_time));
             } else {
-                info_processor::dump_file(&args[1], demo);
+                info_processor::dump_file(&args.demo_name, demo);
                 println!("\nDumped in {:?}", Instant::now().duration_since(start_time));
             }
         } else {
@@ -158,6 +153,8 @@ fn main() {
             
 
         println!("\nParsed all files in: {:?}", Instant::now().duration_since(start_time));
+    } else {
+        println!("Something went wrong with your arguments.");
     }
     
     io::stdin().read_line(&mut String::new()).unwrap();
