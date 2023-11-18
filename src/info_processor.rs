@@ -13,45 +13,45 @@ use std::process::exit;
 use std::io;
 
 pub fn print_header_info(demo: Demo) {
-    println!("File Stamp: {}", demo.header.demo_file_stamp);
-    println!("Demo Protocol: {}", demo.header.demo_protocol);
+    println!("File Stamp:       {}", demo.header.demo_file_stamp);
+    println!("Demo Protocol:    {}", demo.header.demo_protocol);
     println!("Network Protocol: {}", demo.header.network_protocol);
-    println!("Server Name: {}", demo.header.server_name);
-    println!("Client Name: {}", demo.header.client_name);
-    println!("Map Name: {}", demo.header.map_name);
-    println!("Game Directory: {}", demo.header.game_directory);
-    println!("Playback Time: {:.3}", demo.header.playback_time);
-    println!("Playback Ticks: {}", demo.header.playback_ticks);
-    println!("Playback Frames: {}", demo.header.playback_frames);
-    println!("Sign On Length: {}", demo.header.sign_on_length);
+    println!("Server Name:      {}", demo.header.server_name);
+    println!("Client Name:      {}", demo.header.client_name);
+    println!("Map Name:         {}", demo.header.map_name);
+    println!("Game Directory:   {}", demo.header.game_directory);
+    println!("Playback Time:    {:.3}", demo.header.playback_time);
+    println!("Playback Ticks:   {}", demo.header.playback_ticks);
+    println!("Playback Frames:  {}", demo.header.playback_frames);
+    println!("Sign On Length:   {}", demo.header.sign_on_length);
 
     print!("\n");
 
     let measured_ticks_and_time = demo.data_manager.get_measured_ticks_and_time();
     let adjusted_ticks_and_time = demo.data_manager.get_adjusted_ticks_and_time();
 
-    println!("Measured Ticks: {}",  (measured_ticks_and_time.0));
+    println!("Measured Ticks:   {}",  (measured_ticks_and_time.0));
 
     if measured_ticks_and_time.1 < 60f32 {
-        println!("Measured Time: {}", format!("{:.3}", measured_ticks_and_time.1));
+        println!("Measured Time:    {}", format!("{:.3}", measured_ticks_and_time.1));
     } else {
         let minutes = (measured_ticks_and_time.1 / 60f32).floor();
         let seconds = (measured_ticks_and_time.1 - (60f32 * minutes)).floor();
         let millis = (measured_ticks_and_time.1 - (60f32 * minutes)).fract();
-        println!("Measured Time: {}", format!("{}:{:02}.{:.0}", minutes, seconds, millis * 1000.0));
+        println!("Measured Time:    {}", format!("{}:{:02}.{:.0}", minutes, seconds, millis * 1000.0));
     }
 
     // only print adjusted time if there were any adjustments made
     if measured_ticks_and_time != adjusted_ticks_and_time {
-        println!("\nAdjusted Ticks: {}",  (adjusted_ticks_and_time.0));
+        println!("\nAdjusted Ticks:   {}",  (adjusted_ticks_and_time.0));
 
         if adjusted_ticks_and_time.1 < 60f32 {
-            println!("Adjusted Time: {}", format!("{:.3}", adjusted_ticks_and_time.1));
+            println!("Adjusted Time:    {}", format!("{:.3}", adjusted_ticks_and_time.1));
         } else {
             let minutes = (adjusted_ticks_and_time.1 / 60f32).floor();
             let seconds = (adjusted_ticks_and_time.1 - (60f32 * minutes)).floor();
             let millis = (adjusted_ticks_and_time.1 - (60f32 * minutes)).fract();
-            println!("Adjusted Time: {}", format!("{}:{:02}.{:.0}", minutes, seconds, millis * 1000.0));
+            println!("Adjusted Time:    {}", format!("{}:{:02}.{:.0}", minutes, seconds, millis * 1000.0));
         }
     }
 }
@@ -78,17 +78,17 @@ pub fn dump_file(file_path: &String, demo: Demo) {
         file.write_all("Presumed game: Portal 5135 (source unpack)\n\n".as_bytes());
     }
     
-    file.write_all(("File Stamp: ".to_owned() + &demo.header.demo_file_stamp + "\n").as_bytes());
-    file.write_all(("Demo Protocol: ".to_owned() + &demo.header.demo_protocol.to_string() + "\n").as_bytes());
+    file.write_all(("File Stamp:       ".to_owned() + &demo.header.demo_file_stamp + "\n").as_bytes());
+    file.write_all(("Demo Protocol:    ".to_owned() + &demo.header.demo_protocol.to_string() + "\n").as_bytes());
     file.write_all(("Network Protocol: ".to_owned() + &demo.header.network_protocol.to_string() + "\n").as_bytes());
-    file.write_all(("Server Name: ".to_owned() + &demo.header.server_name + "\n").as_bytes());
-    file.write_all(("Client Name: ".to_owned() + &demo.header.client_name + "\n").as_bytes());
-    file.write_all(("Map Name: ".to_owned() + &demo.header.map_name + "\n").as_bytes());
-    file.write_all(("Game Directory: ".to_owned() + &demo.header.map_name + "\n").as_bytes());
-    file.write_all(("Playback Time: ".to_owned() + &demo.header.playback_time.to_string() + "\n").as_bytes());
-    file.write_all(("Playback Ticks: ".to_owned() + &demo.header.playback_ticks.to_string() + "\n").as_bytes());
-    file.write_all(("Playback Frames: ".to_owned() + &demo.header.playback_frames.to_string() + "\n").as_bytes());
-    file.write_all(("Sign On Length: ".to_owned() + &demo.header.sign_on_length.to_string() + "\n").as_bytes());
+    file.write_all(("Server Name:      ".to_owned() + &demo.header.server_name + "\n").as_bytes());
+    file.write_all(("Client Name:      ".to_owned() + &demo.header.client_name + "\n").as_bytes());
+    file.write_all(("Map Name:         ".to_owned() + &demo.header.map_name + "\n").as_bytes());
+    file.write_all(("Game Directory:   ".to_owned() + &demo.header.map_name + "\n").as_bytes());
+    file.write_all(("Playback Time:    ".to_owned() + &demo.header.playback_time.to_string() + "\n").as_bytes());
+    file.write_all(("Playback Ticks:   ".to_owned() + &demo.header.playback_ticks.to_string() + "\n").as_bytes());
+    file.write_all(("Playback Frames:  ".to_owned() + &demo.header.playback_frames.to_string() + "\n").as_bytes());
+    file.write_all(("Sign On Length:   ".to_owned() + &demo.header.sign_on_length.to_string() + "\n").as_bytes());
 
     file.write_all("\n".as_bytes());
     for packet in demo.packets {
