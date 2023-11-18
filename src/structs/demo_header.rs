@@ -35,18 +35,20 @@ impl DemoHeader {
             sign_on_length: 0,
         }
     }
-
-    pub fn parse(&mut self, reader: &mut BitReader) {
-        self.demo_file_stamp = reader.read_ascii_string(64);
-        self.demo_protocol = reader.read_int(32);
-        self.network_protocol = reader.read_int(32);
-        self.server_name = reader.read_ascii_string(2080);
-        self.client_name = reader.read_ascii_string(2080);
-        self.map_name = reader.read_ascii_string(2080);
-        self.game_directory = reader.read_ascii_string(2080);
-        self.playback_time = reader.read_float(32);
-        self.playback_ticks = reader.read_int(32);
-        self.playback_frames = reader.read_int(32);
-        self.sign_on_length = reader.read_int(32);
+    
+    pub fn parse(reader: &mut BitReader) -> Self {
+        Self { 
+            demo_file_stamp: reader.read_ascii_string(64),
+            demo_protocol: reader.read_int(32),
+            network_protocol: reader.read_int(32),
+            server_name: reader.read_ascii_string(2080),
+            client_name: reader.read_ascii_string(2080),
+            map_name: reader.read_ascii_string(2080),
+            game_directory: reader.read_ascii_string(2080),
+            playback_time: reader.read_float(32),
+            playback_ticks: reader.read_int(32),
+            playback_frames: reader.read_int(32),
+            sign_on_length: reader.read_int(32),
+        }
     }
 }

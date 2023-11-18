@@ -9,7 +9,6 @@ use std::ffi::OsStr;
 use args::Args;
 use structs::demo::Demo;
 use structs::demo_header::DemoHeader;
-use structs::packet::Packet;
 use bitreader::BitReader;
 
 #[macro_use] extern crate enum_primitive;
@@ -27,7 +26,6 @@ fn main() {
     let args: Args = Args::parse(env::args().collect());
 
     let path: &Path = Path::new(&args.demo_name);
-    let dumping: bool = args.dump;
 
     if path.is_file() {
         if path.extension().unwrap_or_else(|| {OsStr::new("nope")}) == "dem" {
@@ -39,28 +37,21 @@ fn main() {
             println!("Parsing...\n");
             let start_time = Instant::now();
         
-            let mut header: DemoHeader = DemoHeader::new();
-            header.parse(&mut main_reader);    
-        
             let mut demo = Demo::new();
         
-            demo.header = header;
-        
-            demo.data_manager.get_info_from_header(&demo.header);
+            demo.header = DemoHeader::parse(&mut main_reader);
 
-            demo.data_manager.dumping = dumping;
-        
-            let packets: Vec<Packet> = parser::get_packets(&mut main_reader, &mut demo);
-        
-            demo.packets = packets;
-        
             if demo.header.demo_file_stamp != "HL2DEMO" {
                 println!("Invalid demo file");
                 io::stdin().read_line(&mut String::new()).unwrap();
                 return;
             }
+
+            demo.data_manager.get_info_from_header(&demo.header);
+            demo.data_manager.dumping = args.dump;
+            demo.packets = parser::get_packets(&mut main_reader, &mut demo);
         
-            if !dumping {
+            if !args.dump {
                 info_processor::print_header_info(demo);
                 println!("\nParsed in {:?}", Instant::now().duration_since(start_time));
             } else {
@@ -96,20 +87,19 @@ fn main() {
                 println!("Parsing...\n");
                 let start_time = Instant::now();
             
-                let mut header: DemoHeader = DemoHeader::new();
-                header.parse(&mut main_reader);    
-            
                 let mut demo = Demo::new();
-            
-                demo.header = header;
-            
+
+                demo.header = DemoHeader::parse(&mut main_reader);
+
+                if demo.header.demo_file_stamp != "HL2DEMO" {
+                    println!("Invalid demo file");
+                    io::stdin().read_line(&mut String::new()).unwrap();
+                    return;
+                }
+
                 demo.data_manager.get_info_from_header(&demo.header);
-
-                demo.data_manager.dumping = dumping;
-
-                let packets: Vec<Packet> = parser::get_packets(&mut main_reader, &mut demo);
-            
-                demo.packets = packets;
+                demo.data_manager.dumping = args.dump;
+                demo.packets = parser::get_packets(&mut main_reader, &mut demo);
             
                 if demo.header.demo_file_stamp != "HL2DEMO" {
                     println!("Invalid demo file");
@@ -123,7 +113,7 @@ fn main() {
                 total_adjusted_ticks += demo.data_manager.get_adjusted_ticks_and_time().0;
                 total_adjusted_time += demo.data_manager.get_adjusted_ticks_and_time().1;
 
-                if !dumping {
+                if !args.dump {
                     info_processor::print_header_info(demo);
                     println!("\nParsed {:?} in {:?}", file.file_name(), Instant::now().duration_since(start_time));
                 } else {
