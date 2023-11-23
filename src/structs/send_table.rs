@@ -5,7 +5,7 @@ use std::fs::File;
 use std::io::Write;
 use crate::structs::utils::bitflags_to_string;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SendTable {
     pub needs_decoder: bool,
     pub name: String,
@@ -33,7 +33,7 @@ impl SendTable {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SendTableProp {
     pub send_prop_type: SendPropType,
     pub name: String,
@@ -43,6 +43,7 @@ pub struct SendTableProp {
     pub high_value: Option<f32>,
     pub num_bits: Option<i32>,
     pub num_elements: Option<i32>,
+    pub float_parse_type: FloatParseType
 }
 
 impl SendTableProp {
@@ -82,6 +83,7 @@ impl SendTableProp {
             high_value: high_value,
             num_bits: num_bits,
             num_elements: num_elements,
+            float_parse_type: FloatParseType::None,
         }
     }
 }
@@ -114,7 +116,7 @@ impl Into<&str> for SendPropType {
 }
 
 bitflags::bitflags! {
-    #[derive(Debug, PartialEq)]
+    #[derive(Debug, PartialEq, Clone)]
     pub struct PropFlag : i32 {
         const Unsigned = 1;
         const Coord = 1 << 1;
@@ -133,6 +135,21 @@ bitflags::bitflags! {
         const CoordMpLp = 1 << 14; // low precision
         const CoordMpInt = 1 << 15;
     }
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum FloatParseType {
+    None, // i dont want to use option<>
+    Standard,
+    Coord,
+    BitCoordMp,
+    BitCoordMpLp,
+    BitCoordMpInt,
+    NoScale,
+    Normal,
+    BitCellChord,
+    BitCellChordLp,
+    BitCellChordInt,
 }
 
 // this function will make you wonder why i chose programming instead of something else as a hobby

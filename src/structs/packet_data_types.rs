@@ -62,7 +62,7 @@ impl UserCmd {
 
 // not parsing this yet so this is empty
 // contains a lot of datatables which have data about entities
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct DataTables {
     pub size: i32,
     pub send_table_count: i32,
