@@ -3,6 +3,7 @@ use crate::bitreader::BitReader;
 use crate::structs::utils;
 use crate::structs::data_manager::DataManager;
 use crate::structs::{user_message::{UserMessageType, UserMessage}, data_manager::Game};
+use crate::structs::utils::log2_of_x_plus_one;
 
 /*
 this has all of the parsing for net/svc message types
@@ -220,7 +221,7 @@ impl SvcClassInfo {
 
                 let mut cur_server_class: utils::ServerClass = utils::ServerClass::new();
 
-                cur_server_class.datatable_id = reader.read_int((length as f32).log2() as i32 + 1);
+                cur_server_class.datatable_id = reader.read_int(log2_of_x_plus_one(length));
                 cur_server_class.class_name = reader.read_ascii_string_nulled();
                 cur_server_class.data_table_name = reader.read_ascii_string_nulled();
 
@@ -271,7 +272,7 @@ impl SvcCreateStringTable {
     pub fn parse(reader: &mut BitReader, data_mgr: &DataManager) -> Self {
         let name = reader.read_ascii_string_nulled();
         let max_entries = reader.read_int(16);
-        let num_entries = reader.read_int(((max_entries as f32).log2() as i32) + 1);
+        let num_entries = reader.read_int(log2_of_x_plus_one(max_entries));
         let length: i32 = if data_mgr.game == Game::PORTAL_1_1910503 { reader.read_var_int32() } else { reader.read_int(20) };
         let user_data_fixed_size = reader.read_bool();
 

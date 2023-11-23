@@ -9,7 +9,7 @@ use crate::structs::packet_data_types::{PP, ConsoleCmd, UserCmd, SyncTick, Strin
 use crate::structs::stringtable::StringTable;
 use crate::structs::user_cmd_info::UserCmdInfo;
 use crate::structs::send_table::SendTable;
-use crate::structs::utils::{ServerClass, check_for_pause};
+use crate::structs::utils::{ServerClass, check_for_pause, log2_of_x_plus_one};
 
 // all information about the .dem file structure was taken from https://nekz.me/dem/demo.html and UntitledParser
 
@@ -108,7 +108,7 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
                     if demo_data_mgr.server_class_info == Vec::new() {
                         server_class.datatable_id = reader.read_int(16);
                     } else {
-                        server_class.datatable_id = reader.read_int(((demo_data_mgr.server_class_info.len() as f32).log2() + 1f32) as i32);
+                        server_class.datatable_id = reader.read_int(log2_of_x_plus_one(demo_data_mgr.server_class_info.len() as i32));
                     }
                     server_class.class_name = reader.read_ascii_string_nulled();
                     server_class.data_table_name = reader.read_ascii_string_nulled();

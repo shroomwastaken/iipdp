@@ -285,6 +285,17 @@ pub fn check_for_pause(messages: &Vec<NetSvcMessage>, data_mgr: &mut DataManager
     return data.paused;
 }
 
+// log2(x) + 1; used a bunch in important places
+// i dont use the builtin log2 function bc it only works with floats and makes things messy
+pub fn log2_of_x_plus_one(x: i32) -> i32 {
+    let mut j = 32;
+    // for (j = 31; j >= 0 && (x & (1 << j)) == 0; j--);
+    while j >= 0 && (x & (1 << j)) == 0 {
+        j -= 1;
+    }
+    return j + 1;
+}
+
 // below is something i shouldve done a long time ago
 
 pub fn bitflags_to_string<B: bitflags::Flags>(names: bitflags::iter::IterNames<B>) -> String {
