@@ -10,6 +10,7 @@ use crate::structs::stringtable::StringTable;
 use crate::structs::user_cmd_info::UserCmdInfo;
 use crate::structs::send_table::SendTable;
 use crate::structs::utils::{ServerClass, check_for_pause, log2_of_x_plus_one};
+use crate::structs::datatables_manager::DataTablesManager;
 
 // all information about the .dem file structure was taken from https://nekz.me/dem/demo.html and UntitledParser
 
@@ -116,6 +117,11 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
                     data.server_classes.push(server_class);
                 }
                 data.send_table_count = data.send_tables.len() as i32;
+
+                // probably a bad idea to clone here but ¯\_(ツ)_/¯
+                let mut dt_mgr = DataTablesManager::new(data.clone(), log2_of_x_plus_one(demo_data_mgr.server_class_info.len() as i32));
+                dt_mgr.flatten_classes(&demo_data_mgr);
+                demo_data_mgr.dt_mgr = dt_mgr;
 
                 reader.current = index_before_parsing + (data.size * 8) as usize;
                 reader.fetch();

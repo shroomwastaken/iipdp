@@ -3,6 +3,8 @@ use crate::structs::demo_header::DemoHeader;
 use crate::structs::user_message::UserMessageType;
 use crate::structs::send_table::SendPropType;
 use crate::structs::stringtable::StringTable;
+use crate::structs::datatables_manager::DataTablesManager;
+use crate::structs::packet_data_types::DataTables;
 
 // will be used more later in development
 // for now this stores information vital for parsing the demo
@@ -36,6 +38,7 @@ pub struct DataManager {
     pub send_prop_type_list: Vec<SendPropType>,
     pub paused: bool,
     pub dumping: bool,
+    pub dt_mgr: DataTablesManager,
 }
 
 impl DataManager {
@@ -56,6 +59,7 @@ impl DataManager {
             send_prop_type_list: Vec::new(),
             paused: false,
             dumping: false,
+            dt_mgr: DataTablesManager::new(DataTables::new(), 0)
         }
     }
 

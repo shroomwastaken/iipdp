@@ -21,6 +21,7 @@ mod info_processor;
 mod parser;
 mod adjust_time;
 mod args;
+mod prop_reading;
 
 fn main() {
     let args: Args = Args::parse(env::args().collect());
