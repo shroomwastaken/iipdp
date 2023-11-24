@@ -116,6 +116,9 @@ fn read_packet_data(reader: &mut BitReader, packet_type: PacketType, demo_data_m
 
                     data.server_classes.push(server_class);
                 }
+                // untitledparser gets class info from svcclassinfo on some condition but ill get it here at all times
+                demo_data_mgr.server_class_info = data.server_classes.clone();
+                
                 data.send_table_count = data.send_tables.len() as i32;
 
                 // probably a bad idea to clone here but ¯\_(ツ)_/¯
