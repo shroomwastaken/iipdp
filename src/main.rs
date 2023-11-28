@@ -55,8 +55,11 @@ fn main() {
             if !args.dump {
                 info_processor::print_header_info(demo);
                 println!("\nParsed in {:?}", Instant::now().duration_since(start_time));
-            } else {
+            } else if !args.fc {
                 info_processor::dump_file(&args.demo_name, demo);
+                println!("\nDumped in {:?}", Instant::now().duration_since(start_time));
+            } else {
+                info_processor::dump_flattened_classes(&args.demo_name, demo.data_manager.dt_mgr.prop_lookup);
                 println!("\nDumped in {:?}", Instant::now().duration_since(start_time));
             }
         } else {
@@ -117,8 +120,11 @@ fn main() {
                 if !args.dump {
                     info_processor::print_header_info(demo);
                     println!("\nParsed {:?} in {:?}", file.file_name(), Instant::now().duration_since(start_time));
-                } else {
+                } else if !args.fc {
                     info_processor::dump_file(&file.path().to_string_lossy().to_string(), demo);
+                    println!("\nDumped in {:?}", Instant::now().duration_since(start_time));
+                } else {
+                    info_processor::dump_flattened_classes(&file.path().to_string_lossy().to_string(), demo.data_manager.dt_mgr.prop_lookup);
                     println!("\nDumped in {:?}", Instant::now().duration_since(start_time));
                 }
             }

@@ -5,12 +5,14 @@ Usage:
 
 Options:
 \t-dump: Dump data from demo into a .txt file in the demo's directory
+\t\t-fc: Dump only flattened sever class data
 \t-help: Print this message";
 
 
 pub struct Args {
     pub demo_name: String,
     pub dump: bool,
+    pub fc: bool,
 }
 
 impl Args {
@@ -22,6 +24,10 @@ impl Args {
             std::process::exit(0);
         }
         
-        Self { demo_name: args[1].clone(), dump: args.contains(&"-dump".to_string()) }
+        Self {
+            demo_name: args[1].clone(),
+            dump: args.contains(&"-dump".to_string()),
+            fc: args.contains(&"-fc".to_string()) && args.contains(&"-dump".to_string())
+        }
     }
 }
