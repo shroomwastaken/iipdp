@@ -278,6 +278,26 @@ impl fmt::Display for Vec3 {
     }
 }
 
+pub struct Vec2 {
+    pub x: f32,
+    pub y: f32,
+}
+
+impl Vec2 {
+    pub fn new() -> Vec2 {
+        Vec2 { x: 0.0, y: 0.0 }
+    }
+}
+
+impl fmt::Display for Vec2 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut base_str: String = "                              ".to_string();
+        base_str.replace_range(0..self.x.to_string().len(), &self.x.to_string());
+        base_str.replace_range(10..self.y.to_string().len() + 10, &self.y.to_string());
+        write!(f, "{}", base_str)
+    }
+}
+
 // theres a better way to go about this whole pause checking thing probably
 // too bad
 pub fn check_for_pause(messages: &Vec<NetSvcMessage>, data_mgr: &mut DataManager) -> bool {

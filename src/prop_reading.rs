@@ -1,6 +1,6 @@
 use crate::BitReader;
 use crate::structs::send_table::{SendTableProp, PropFlag, FloatParseType};
-use crate::structs::utils::Vec3;
+use crate::structs::utils::{Vec3, Vec2};
 
 /*
     below is prop parsing functions, they dont look very nice
@@ -207,5 +207,9 @@ impl BitReader {
         }
 
         return ret_vec;
+    }
+
+    pub fn decode_vector_2(&mut self, prop: &mut SendTableProp) -> Vec2 {
+        return Vec2 { x: self.decode_float(prop), y: self.decode_float(prop) }
     }
 }
