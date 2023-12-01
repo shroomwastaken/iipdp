@@ -33,7 +33,7 @@ impl SendTable {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct SendTableProp {
     pub send_prop_type: SendPropType,
     pub name: String,

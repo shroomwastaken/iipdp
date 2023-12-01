@@ -102,7 +102,7 @@ impl DataTablesManager {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct FlattenedProp {
     pub name: String,
     pub prop_info: SendTableProp,
