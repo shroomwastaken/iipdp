@@ -1,6 +1,8 @@
 use crate::BitReader;
-use crate::structs::send_table::{SendTableProp, PropFlag, FloatParseType};
-use crate::structs::utils::{Vec3, Vec2};
+use crate::structs::datatables_manager::FlattenedProp;
+use crate::structs::enity_stuff::{EntityProperty, SingleEntProp, ArrEntProp};
+use crate::structs::send_table::{SendTableProp, PropFlag, FloatParseType, SendPropType};
+use crate::structs::utils::{Vec3, Vec2, log2_of_x_plus_one};
 
 /*
     below is prop parsing functions, they dont look very nice
@@ -211,5 +213,102 @@ impl BitReader {
 
     pub fn decode_vector_2(&mut self, prop: &mut SendTableProp) -> Vec2 {
         return Vec2 { x: self.decode_float(prop), y: self.decode_float(prop) }
+    }
+
+    pub fn decode_int_arr(&mut self, f_prop: &FlattenedProp) -> Vec<i32> {
+        let count = self.read_int(log2_of_x_plus_one(f_prop.prop_info.num_elements.unwrap()));
+        let mut res: Vec<i32> = Vec::new();
+        for _ in 0..count { res.push(self.decode_int(&f_prop.prop_info)) }
+        return res;
+    }
+
+    pub fn decode_float_arr(&mut self, f_prop: &mut FlattenedProp) -> Vec<f32> {
+        let count = self.read_int(log2_of_x_plus_one(f_prop.prop_info.num_elements.unwrap()));
+        let mut res: Vec<f32> = Vec::new();
+        for _ in 0..count { res.push(self.decode_float(&mut f_prop.prop_info)) }
+        return res;
+    }
+
+    pub fn decode_vector2_arr(&mut self, f_prop: &mut FlattenedProp) -> Vec<Vec2> {
+        let count = self.read_int(log2_of_x_plus_one(f_prop.prop_info.num_elements.unwrap()));
+        let mut res: Vec<Vec2> = Vec::new();
+        for _ in 0..count { res.push(self.decode_vector_2(&mut f_prop.prop_info)) }
+        return res;
+    }
+
+    pub fn decode_vector3_arr(&mut self, f_prop: &mut FlattenedProp) -> Vec<Vec3> {
+        let count = self.read_int(log2_of_x_plus_one(f_prop.prop_info.num_elements.unwrap()));
+        let mut res: Vec<Vec3> = Vec::new();
+        for _ in 0..count { res.push(self.decode_vector_3(&mut f_prop.prop_info)) }
+        return res;
+    }
+
+    pub fn decode_string_arr(&mut self, f_prop: &FlattenedProp) -> Vec<String> {
+        let count = self.read_int(log2_of_x_plus_one(f_prop.prop_info.num_elements.unwrap()));
+        let mut res: Vec<String> = Vec::new();
+        for _ in 0..count { res.push(self.decode_string()) }
+        return res;
+    }
+
+
+    // now the fun stuff
+
+    pub fn read_ent_props(&mut self, f_props: &mut Vec<FlattenedProp>) -> Vec<(i32, EntityProperty)> {
+        let mut props: Vec<(i32, EntityProperty)> = Vec::new();
+
+        let mut i: i32 = -1;
+        // theres demo protocol 4 stuff to be done here at some point in the future
+
+        while self.read_bool() {
+            i += self.read_u_bit_var() + 1;
+            if i < 0 || i >= f_props.len() as i32 {
+                panic!("ah shit");
+            }
+            props.push((i, self.create_and_read_prop(&mut f_props[i as usize])));
+        }
+
+        return props;
+    }
+
+    pub fn create_and_read_prop(&mut self, f_prop: &mut FlattenedProp) -> EntityProperty {
+        let offset = self.current as i32;
+        return match f_prop.prop_info.send_prop_type {
+            SendPropType::Int => {
+                EntityProperty::SingleEntProp(SingleEntProp::IntProp(self.decode_int(&f_prop.prop_info)), f_prop.clone(), offset, self.current as i32 - offset)
+            },
+            SendPropType::Float => {
+                EntityProperty::SingleEntProp(SingleEntProp::FloatProp(self.decode_float(&mut f_prop.prop_info)), f_prop.clone(), offset, self.current as i32 - offset)
+            },
+            SendPropType::Vector2 => {
+                EntityProperty::SingleEntProp(SingleEntProp::Vector2Prop(self.decode_vector_2(&mut f_prop.prop_info)), f_prop.clone(), offset, self.current as i32 - offset)
+            },
+            SendPropType::Vector3 => {
+                EntityProperty::SingleEntProp(SingleEntProp::Vector3Prop(self.decode_vector_3(&mut f_prop.prop_info)), f_prop.clone(), offset, self.current as i32 - offset)
+            },
+            SendPropType::String => {
+                EntityProperty::SingleEntProp(SingleEntProp::StringProp(self.decode_string()), f_prop.clone(), offset, self.current as i32 - offset)
+            },
+            SendPropType::Array => {
+                match f_prop.array_element_prop_info.clone().unwrap().send_prop_type {
+                    SendPropType::Int => {
+                        EntityProperty::ArrEntProp(ArrEntProp::IntProp(self.decode_int_arr(&f_prop)), f_prop.clone(), offset, self.current as i32 - offset)
+                    },
+                    SendPropType::Float => {
+                        EntityProperty::ArrEntProp(ArrEntProp::FloatProp(self.decode_float_arr(f_prop)), f_prop.clone(), offset, self.current as i32 - offset)
+                    },
+                    SendPropType::Vector2 => {
+                        EntityProperty::ArrEntProp(ArrEntProp::Vector2Prop(self.decode_vector2_arr(f_prop)), f_prop.clone(), offset, self.current as i32 - offset)
+                    },
+                    SendPropType::Vector3 => {
+                        EntityProperty::ArrEntProp(ArrEntProp::Vector3Prop(self.decode_vector3_arr(f_prop)), f_prop.clone(), offset, self.current as i32 - offset)
+                    },
+                    SendPropType::String => {
+                        EntityProperty::ArrEntProp(ArrEntProp::StringProp(self.decode_string_arr(f_prop)), f_prop.clone(), offset, self.current as i32 - offset)
+                    },
+                    _ => { panic!("how d you get a datatable or an array in an array lmao") }
+                }
+            },
+            _ => { panic!("how d you get a datatable in a flattened prop lmao") }
+        };
     }
 }
