@@ -2,6 +2,6 @@
 /demos
 *.txt
 upl
-UntitledParser.exe
+*.exe
 /.vscode
 *.code-workspace
