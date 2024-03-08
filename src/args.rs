@@ -6,6 +6,7 @@ Usage:
 Options:
 \t-dump: Dump data from demo into a .txt file in the demo's directory
 \t\t-fc: Dump only flattened sever class data
+\t\t-v : Dump data needed for verification (best used with a folder of demos)
 \t-help: Print this message";
 
 
@@ -13,6 +14,7 @@ pub struct Args {
     pub demo_name: String,
     pub dump: bool,
     pub fc: bool,
+	pub v: bool,
 }
 
 impl Args {
@@ -27,7 +29,8 @@ impl Args {
         Self {
             demo_name: args[1].clone(),
             dump: args.contains(&"-dump".to_string()),
-            fc: args.contains(&"-fc".to_string()) && args.contains(&"-dump".to_string())
-        }
+            fc: args.contains(&"-fc".to_string()) && args.contains(&"-dump".to_string()),
+			v: args.contains(&"-v".to_string()) && args.contains(&"-dump".to_string()),
+		}
     }
 }

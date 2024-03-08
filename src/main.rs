@@ -1,5 +1,6 @@
 use std::fs;
 use std::env;
+use std::fs::File;
 use std::io;
 use std::path::Path;
 use std::process::exit;
@@ -54,12 +55,17 @@ fn main() {
             if !args.dump {
                 info_processor::print_header_info(demo);
                 println!("\nParsed in {:?}", Instant::now().duration_since(start_time));
-            } else if !args.fc {
-                info_processor::dump_file(&args.demo_name, demo);
-                println!("\nDumped in {:?}", Instant::now().duration_since(start_time));
             } else {
-                info_processor::dump_flattened_classes(&args.demo_name, demo.data_manager.dt_mgr.prop_lookup);
-                println!("\nDumped in {:?}", Instant::now().duration_since(start_time));
+                if args.fc {
+                    info_processor::dump_flattened_classes(&args.demo_name, demo.data_manager.dt_mgr.prop_lookup);
+                    println!("\nDumped in {:?}", Instant::now().duration_since(start_time));
+                } else if args.v {
+                    info_processor::verifier_dump(&args.demo_name, demo, &None);
+                    println!("\nDumped in {:?}", Instant::now().duration_since(start_time));
+                } else {
+                    info_processor::dump_file(&args.demo_name, demo);
+                    println!("\nDumped in {:?}", Instant::now().duration_since(start_time));
+                }
             }
         } else {
             println!("Invalid file!");
@@ -67,8 +73,23 @@ fn main() {
             return;
         }
     } else if path.is_dir() {
+        let mut vdumpfile: Option<&File> = None;
+        let creator: File;
+        if args.v && args.dump {
+            let new_path = path.to_str().unwrap().to_string().trim_end_matches(".dem").to_owned() + "-vdump.txt";
+            creator = File::create(new_path.clone()).unwrap_or_else(|_| {
+                println!("Error when creating vdump file :(");
+                exit(1);
+            });
+            println!("File created at: {}\n", new_path);
+            vdumpfile = Some(&creator);
+        }
         let start_time = Instant::now();
-        let files = fs::read_dir(path).unwrap();
+        let mut files: Vec<_> = fs::read_dir(path).unwrap()
+                                              .map(|r| r.unwrap())
+                                              .collect();
+        files.sort_by_key(|dir| dir.path());
+
 
         let mut total_measured_ticks: i32 = 0;
         let mut total_measured_time: f32 = 0.0;
@@ -76,8 +97,7 @@ fn main() {
         let mut total_adjusted_ticks: i32 = 0;
         let mut total_adjusted_time: f32 = 0.0;
 
-        for f in files {
-            let file = f.unwrap();
+        for file in files {
             if file.path().extension().unwrap_or_else(|| {OsStr::new("nope")}) == "dem" {
                 println!("\n\nFile Name: {:?}", file.file_name());
                 
@@ -116,15 +136,20 @@ fn main() {
                 total_adjusted_ticks += demo.data_manager.get_adjusted_ticks_and_time().0;
                 total_adjusted_time += demo.data_manager.get_adjusted_ticks_and_time().1;
 
-                if !args.dump {
-                    info_processor::print_header_info(demo);
-                    println!("\nParsed {:?} in {:?}", file.file_name(), Instant::now().duration_since(start_time));
-                } else if !args.fc {
-                    info_processor::dump_file(&file.path().to_string_lossy().to_string(), demo);
-                    println!("\nDumped in {:?}", Instant::now().duration_since(start_time));
+                if args.dump {
+                    if args.fc {
+                        info_processor::dump_flattened_classes(&args.demo_name, demo.data_manager.dt_mgr.prop_lookup);
+                        println!("\nDumped in {:?}", Instant::now().duration_since(start_time));
+                    } else if args.v {
+                        info_processor::verifier_dump(&file.file_name().to_string_lossy().into_owned(), demo, &vdumpfile);
+                        println!("\nDumped in {:?}", Instant::now().duration_since(start_time));
+                    } else {
+                        info_processor::dump_file(&args.demo_name, demo);
+                        println!("\nDumped in {:?}", Instant::now().duration_since(start_time));
+                    }
                 } else {
-                    info_processor::dump_flattened_classes(&file.path().to_string_lossy().to_string(), demo.data_manager.dt_mgr.prop_lookup);
-                    println!("\nDumped in {:?}", Instant::now().duration_since(start_time));
+                    info_processor::print_header_info(demo);
+                    println!("\nParsed in {:?}", Instant::now().duration_since(start_time));
                 }
             }
         }
