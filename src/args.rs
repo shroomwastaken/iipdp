@@ -1,5 +1,5 @@
 const USAGE_TEXT: &str = "
-iipdp v0.2.7 made by shroom
+iipdp v0.3.0 made by shroom
 Usage:
 \tiipdp.exe <DEMO_NAME> [OPTIONS]
 
