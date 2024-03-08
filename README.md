@@ -13,7 +13,8 @@ You can open it from the command line:
 `iipdp.exe <demo name> [options]`
 
 - Options:
-`-dump`: Outputs all available information from the demo file to a .txt file in the working directory.
+`-dump`: Outputs all available information from the demo file to a .txt file in the working directory. Has sub-options `-fc` (dump flattened classes) and `-v` (verifier dump)
+Usage example: `./iipdp <demo name> -dump [-v/-fc]`
 
 Or just drag a demo file onto it to open it.
 
@@ -57,3 +58,5 @@ Everything else:
     * Added Datatables packet parsing and dumping
     * Prettier flag dumping
     * Made it go vroooooooom (very fast) (again)
+- v0.3.0:
+	* Added verifier dump feature `-v`
