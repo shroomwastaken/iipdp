@@ -1,6 +1,10 @@
 # IIPDP
 an Incredibly Inefficient Portal Demo Parser written in Rust
 
+<hr>
+As of 08.09.2024 this repository is a public archive because iipdp is being rewritten from scratch (see https://github.com/shroomwastaken/repdp )
+<hr>
+
 # Installation
 1. Download the .exe file from the Releases tab
 2. That's it!
